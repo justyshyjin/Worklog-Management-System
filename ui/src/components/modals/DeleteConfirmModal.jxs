@@ -1,0 +1,50 @@
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
+} from "@mui/material";
+
+const DeleteConfirmModal = ({
+  open,
+  onClose,
+  onDelete
+}) => {
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+    >
+      <DialogTitle>
+        Delete Task
+      </DialogTitle>
+
+      <DialogContent>
+        Are you sure you want to
+        delete this task?
+      </DialogContent>
+
+      <DialogActions>
+
+        <Button
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
+
+        <Button
+          color="error"
+          variant="contained"
+          onClick={onDelete}
+        >
+          Delete
+        </Button>
+
+      </DialogActions>
+
+    </Dialog>
+  );
+};
+
+export default DeleteConfirmModal;

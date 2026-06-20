@@ -1,0 +1,12 @@
+.username-label {
+  color: #00a884 !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  font-family: "Poppins", sans-serif !important;
+  top:-11px!important;
+}
+
+/* When field is focused */
+.username-label.Mui-focused {
+  color: #007a63 !important;
+}

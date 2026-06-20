@@ -1,0 +1,184 @@
+/* =========================
+   SIDEBAR CONTAINER
+========================= */
+
+.sidebar {
+  background: linear-gradient(
+    180deg,
+    #081420,
+    #102437
+  );
+
+  border-right: 1px solid
+    rgba(0, 255, 136, 0.15);
+
+  min-height: calc(100vh - 90px);
+
+  overflow: hidden;
+
+  transition: width 0.35s ease;
+
+  box-shadow:
+    0 0 15px rgba(0, 255, 136, 0.08);
+}
+
+.sidebar.expanded {
+  width: 260px;
+}
+
+.sidebar.collapsed {
+  width: 75px;
+}
+
+/* =========================
+   MENU LIST
+========================= */
+
+.menu-list {
+  list-style: none;
+
+  margin: 0;
+
+  padding: 15px 0;
+}
+
+/* =========================
+   MENU ITEMS
+========================= */
+
+.menu-item,
+.sidebar-toggle {
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin: 8px 10px;
+
+  padding: 14px 16px;
+
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  color: #9bb6d4;
+  
+  text-decoration: none; /* Remove underline */
+
+  transition: all 0.25s ease;
+}
+
+/* =========================
+   TOGGLE BUTTON
+========================= */
+
+.sidebar-toggle {
+  margin-bottom: 15px;
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.08);
+
+  /* border-radius: 0; */
+}
+
+/* =========================
+   ICONS
+========================= */
+
+.menu-item svg,
+.sidebar-toggle svg {
+  font-size: 22px;
+
+  min-width: 22px;
+
+  transition: all 0.25s ease;
+}
+
+/* =========================
+   HOVER EFFECTS
+========================= */
+
+.menu-item:hover,
+.sidebar-toggle:hover {
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,255,136,0.15),
+      rgba(0,180,255,0.15)
+    );
+
+  color: #00ff88;
+
+  transform: translateX(5px);
+
+  box-shadow:
+    0 0 12px rgba(0,255,136,0.15);
+}
+
+.menu-item:hover svg,
+.sidebar-toggle:hover svg {
+
+  color: #00ff88;
+
+  transform: scale(1.15);
+}
+
+/* =========================
+   ACTIVE MENU
+========================= */
+
+.menu-item.active {
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,255,136,0.20),
+      rgba(0,180,255,0.20)
+    );
+
+  color: #00ff88;
+
+  border-left:
+    3px solid #00ff88;
+
+  box-shadow:
+    0 0 15px rgba(0,255,136,0.15);
+}
+
+/* =========================
+   MENU LABELS
+========================= */
+
+.menu-label {
+
+  white-space: nowrap;
+
+  transition:
+    opacity 0.2s ease,
+    width 0.2s ease;
+}
+
+/* =========================
+   COLLAPSED MODE
+========================= */
+
+.sidebar.collapsed .menu-label {
+
+  opacity: 0;
+
+  width: 0;
+
+  overflow: hidden;
+}
+
+.sidebar.collapsed .menu-item,
+.sidebar.collapsed .sidebar-toggle {
+
+  justify-content: center;
+
+  padding-left: 0;
+
+  padding-right: 0;
+}

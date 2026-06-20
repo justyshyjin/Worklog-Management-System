@@ -1,0 +1,423 @@
+/* ======================================
+   COMMON MODAL THEME
+   WorkLog Management System
+====================================== */
+
+
+/* Modal Window */
+
+.common-view-modal .MuiPaper-root,
+.common-edit-modal .MuiPaper-root {
+
+    background:
+        linear-gradient(135deg, #1d252ee0, #012141ed) !important;
+
+
+    color:
+        #d7f7ff !important;
+
+
+    border:
+
+        1px solid
+
+        rgba(
+            0,
+            255,
+            136,
+            0.25
+        );
+
+
+    border-radius:
+        18px !important;
+
+
+    box-shadow:
+
+        0 20px 60px
+
+        rgba(
+            0,
+            0,
+            0,
+            0.65
+        );
+
+
+}
+
+
+
+/* ======================================
+   TITLE
+====================================== */
+
+
+.common-modal-title {
+
+    color:
+        #00ff88 !important;
+
+
+    font-size:
+        22px !important;
+
+
+    font-weight:
+        600 !important;
+
+
+    border-bottom:
+
+        1px solid
+
+        rgba(
+            0,
+            255,
+            136,
+            0.18
+        );
+
+
+}
+
+
+
+/* ======================================
+   CONTENT AREA
+====================================== */
+
+
+.view-fields {
+
+    display:
+
+        flex;
+
+    flex-direction:
+
+        column;
+
+    gap:
+
+        14px;
+
+    padding:
+
+        10px 5px;
+
+}
+
+
+
+/* ======================================
+   FIELD ROW
+====================================== */
+
+
+.view-field-row {
+
+    display:
+
+        grid;
+
+
+    grid-template-columns:
+
+        220px 1fr;
+
+
+    align-items:
+
+        center;
+
+
+    padding:
+
+        12px 16px;
+
+
+    border-radius:
+
+        10px;
+
+
+    background:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.03
+        );
+
+
+    border:
+
+        1px solid
+
+        rgba(
+            0,
+            255,
+            136,
+            0.12
+        );
+
+
+}
+
+
+
+/* FIELD LABEL */
+
+.view-label {
+
+    color:
+
+        #00ff88;
+
+
+    font-size:
+
+        15px;
+
+
+    font-weight:
+
+        600;
+
+}
+
+
+
+/* FIELD VALUE */
+
+.view-value {
+
+    color:
+
+        #d7f7ff;
+
+
+    font-size:
+
+        15px;
+
+
+    word-break:
+
+        break-word;
+
+}
+
+
+
+/* ======================================
+   FOOTER BUTTON AREA
+====================================== */
+
+
+.common-modal-actions {
+
+
+    justify-content:
+
+        center !important;
+
+
+    gap:
+
+        25px;
+
+
+    padding:
+
+        20px !important;
+
+
+    border-top:
+
+        1px solid
+
+        rgba(
+            0,
+            255,
+            136,
+            0.15
+        );
+
+
+}
+
+
+
+/* ======================================
+   EDIT BUTTON
+====================================== */
+
+
+.edit-btn {
+
+
+    min-width:
+
+        120px !important;
+
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #00b4ff,
+            #0088cc
+        ) !important;
+
+
+    color:
+
+        white !important;
+
+
+    font-weight:
+
+        600 !important;
+
+
+    border-radius:
+
+        10px !important;
+
+
+}
+
+
+
+/* ======================================
+   DELETE BUTTON
+====================================== */
+
+
+.delete-btn {
+
+
+    min-width:
+
+        120px !important;
+
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #ff4040,
+            #a90000
+        ) !important;
+
+
+    color:
+
+        white !important;
+
+
+    font-weight:
+
+        600 !important;
+
+
+    border-radius:
+
+        10px !important;
+
+
+}
+
+
+
+/* Hover Effects */
+
+
+.edit-btn:hover {
+
+
+    transform:
+
+        translateY(-2px);
+
+
+    box-shadow:
+
+        0 8px 20px
+
+        rgba(
+            0,
+            180,
+            255,
+            0.35
+        );
+
+
+}
+
+
+
+.delete-btn:hover {
+
+
+    transform:
+
+        translateY(-2px);
+
+
+    box-shadow:
+
+        0 8px 20px
+
+        rgba(
+            255,
+            0,
+            0,
+            0.35
+        );
+
+
+}
+
+
+
+/* ======================================
+   MOBILE SUPPORT
+====================================== */
+
+
+@media(max-width:700px){
+
+
+    .view-field-row {
+
+
+        grid-template-columns:
+
+            1fr;
+
+
+        gap:
+
+            8px;
+
+
+    }
+
+
+    .view-label {
+
+
+        font-size:
+
+            14px;
+
+
+    }
+
+
+}

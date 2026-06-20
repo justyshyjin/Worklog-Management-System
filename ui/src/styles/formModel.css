@@ -1,0 +1,476 @@
+.form-modal .MuiPaper-root {
+
+
+    background:
+    linear-gradient(
+        135deg,
+        #081420,
+        #102437
+    ) !important;
+
+
+    color:
+    #d7f7ff !important;
+
+
+    border:
+
+    1px solid
+    rgba(
+        0,
+        255,
+        136,
+        0.25
+    );
+
+
+    border-radius:
+    18px !important;
+
+
+    box-shadow:
+
+    0 20px 50px
+    rgba(
+        0,
+        0,
+        0,
+        0.5
+    );
+
+
+    width:
+    1100px;
+
+
+    max-width:
+    95vw;
+
+
+    min-height:
+    500px;
+
+}
+
+
+
+
+
+.form-modal-title {
+
+
+    background:
+
+    linear-gradient(
+        180deg,
+        #2caa2f,
+        #111e39
+    );
+
+
+    color:
+    #041014 !important;
+
+
+    font-weight:
+    700 !important;
+
+
+    font-size:
+    22px !important;
+
+}
+
+
+
+
+
+/* Form Grid */
+
+.form-fields {
+
+    display:grid;
+
+
+    grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+
+    gap:
+    25px;
+
+
+    margin-top:
+    20px;
+    align-items:start;
+
+}
+
+
+
+
+.form-field {
+
+    width:
+    100%;
+
+}
+
+
+
+
+/*
+    Width controls
+
+    small-width  -> 1 column
+    medium-width -> 2 columns
+    full-width   -> 3 columns
+
+*/
+
+
+.small-width {
+
+    grid-column:
+    span 1;
+
+}
+
+
+
+
+.medium-width {
+
+    grid-column:
+    span 2;
+
+}
+
+
+
+
+.full-width {
+
+    grid-column:
+    1 / -1;
+
+}
+
+
+.new-row {
+
+    grid-column-start:
+    1;
+
+}
+
+
+
+/* Input Fields */
+
+
+.form-input .MuiOutlinedInput-root,
+.form-textarea .MuiOutlinedInput-root {
+
+
+    background:
+
+    rgba(
+        255,
+        255,
+        255,
+        0.05
+    );
+
+
+    color:
+    #ffffff;
+
+
+    border-radius:
+    12px;
+
+}
+
+
+
+
+
+.MuiInputLabel-root {
+
+
+    color:
+    #9ccfd8 !important;
+
+}
+
+
+
+
+
+.MuiOutlinedInput-notchedOutline {
+
+
+    border-color:
+
+    rgba(
+        0,
+        255,
+        136,
+        0.35
+    ) !important;
+
+}
+
+
+
+
+
+
+
+/* Buttons Area */
+
+
+.form-modal-actions {
+
+
+    padding:
+
+    20px 30px !important;
+
+
+    justify-content:
+
+    center !important;
+
+
+    gap:
+
+    20px;
+
+}
+
+
+
+
+
+
+/* Save Button */
+
+
+.form-save-btn {
+
+
+    background:
+
+    linear-gradient(
+        42deg,
+        #38c906,
+        #050984
+    ) !important;
+
+
+    color:
+    #061018 !important;
+
+
+    font-weight:
+    700 !important;
+
+
+    border-radius:
+    12px !important;
+
+}
+
+
+
+
+.form-save-btn:hover {
+
+
+    background:
+
+    linear-gradient(
+        42deg,
+        #38c90696,
+        #05098485
+    ) !important;
+
+
+    color:
+    white;
+
+}
+
+
+
+
+
+
+/* Cancel Button */
+
+
+.form-cancel-btn {
+
+
+    color:
+    #d7f7ff !important;
+
+
+    border-color:
+
+    rgba(
+        68,
+        74,
+        243,
+        0.961
+    ) !important;
+
+}
+
+
+
+
+
+
+
+
+/* Dropdown Popup */
+
+
+.MuiPopover-root .MuiPaper-root {
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        #081420,
+        #102437
+    ) !important;
+
+
+    color:
+    #d7f7ff !important;
+
+
+    border:
+
+    1px solid
+    rgba(
+        0,
+        255,
+        136,
+        0.25
+    );
+
+
+    border-radius:
+    12px !important;
+
+
+    box-shadow:
+
+    0 15px 40px
+    rgba(
+        0,
+        0,
+        0,
+        0.5
+    );
+
+}
+
+
+
+
+
+
+
+/* Dropdown Options */
+
+
+.MuiMenuItem-root {
+
+
+    color:
+    #d7f7ff !important;
+
+
+    font-size:
+    15px;
+
+
+    padding:
+
+    12px 18px !important;
+
+}
+
+
+
+
+
+.MuiMenuItem-root:hover {
+
+
+    background:
+
+    linear-gradient(
+        90deg,
+        rgba(
+            0,
+            255,
+            136,
+            0.25
+        ),
+        rgba(
+            0,
+            198,
+            255,
+            0.25
+        )
+    ) !important;
+
+}
+
+
+
+
+
+
+.MuiMenuItem-root.Mui-selected {
+
+
+    background:
+
+    rgba(
+        0,
+        255,
+        136,
+        0.20
+    ) !important;
+
+
+    color:
+    #00ff88 !important;
+
+}
+
+
+
+
+
+
+
+/* Dropdown Arrow */
+
+
+.MuiSelect-icon {
+
+
+    color:
+    #00ff88 !important;
+
+}

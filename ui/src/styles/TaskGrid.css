@@ -1,0 +1,352 @@
+.task-container{
+  background:#101820;
+
+  border-radius:12px;
+
+  padding:20px;
+
+  border:1px solid rgba(0,255,136,.15);
+
+  margin-bottom:20px;
+}
+
+.task-table{
+  width:100%;
+
+  border-collapse:collapse;
+}
+
+.task-table th{
+  background:#0d1720;
+
+  color:#00ff88;
+
+  text-align:left;
+
+  padding:15px;
+}
+
+.task-table td{
+  padding:15px;
+
+  border-top:1px solid #223;
+}
+
+.task-table tr:hover{
+  background:
+  rgba(255, 106, 0, 0.05);
+}
+
+.status{
+  padding:5px 10px;
+
+  border-radius:20px;
+
+  font-size:12px;
+}
+
+.in_progress{
+  /* background:#00ff88; */
+  background:linear-gradient(
+      85deg,
+      #55ea4b,
+      #21581fb3
+    );
+  color:black!important;
+}
+
+.finished{
+  /* background:#00cfff; */
+  /* color:black; */
+}
+
+.task-actions {
+
+    display:flex;
+
+    gap:4px;
+
+}
+
+
+
+.action-btn
+{
+
+  margin-right:10px;
+
+  border:none;
+
+  padding:4px 5px;
+
+  cursor:pointer;
+
+  border-radius:6px;
+
+  width:30px;
+
+  height:30px;
+}
+
+.action-btn{
+  background:
+    linear-gradient(
+    180deg,
+    #65fc2d,
+    #366508
+  );
+}
+.action-btn:hover{
+  background:
+    linear-gradient(
+    180deg,
+    #049d09,
+    #024204
+  );
+}
+.action-btn.edit{
+  background:linear-gradient(
+    180deg,
+    #1bdeec,
+    #071f57
+  );
+}
+.action-btn.edit:hover{
+  background:linear-gradient(
+    180deg,
+    #1b6bec,
+    #0f0757
+  );
+}
+.action-btn.run{
+  background:linear-gradient(
+    180deg,
+    #f6df10,
+    #524a0e
+  );
+}
+.action-btn.run:hover{
+  background:linear-gradient(
+    180deg,
+    #f67010,
+    #52380e
+  );
+}
+.action-btn.delete{
+  background:linear-gradient(
+    180deg,
+    #e82f2f,
+    #500807
+  );
+}
+
+.export-toolbar{
+    float:right;
+}
+.ag-theme-alpine{
+  float:left !important;
+}
+.ag-theme-alpine {
+
+  --ag-background-color: #081420;
+
+  --ag-foreground-color: #d7f9ff;
+
+  --ag-header-background-color: #102437;
+
+  --ag-header-foreground-color: #00ff88;
+
+  --ag-border-color:
+    rgba(0,255,136,.15);
+
+  --ag-row-hover-color:
+    rgba(0,255,136,.08);
+
+  --ag-selected-row-background-color:
+    rgba(0,255,136,.15);
+
+  --ag-odd-row-background-color:
+    rgba(255,255,255,.01);
+
+  --ag-font-size: 13px;
+
+  --ag-font-family:
+    "Segoe UI", sans-serif;
+    display:inline-block;
+}
+.ag-theme-alpine .ag-header {
+
+  border-bottom:
+    1px solid rgba(0,255,136,.2);
+
+  box-shadow:
+    0 0 15px rgba(0,255,136,.08);
+}
+.ag-theme-alpine .ag-header-cell {
+
+  font-weight: 700;
+
+  letter-spacing: .5px;
+
+  text-transform: uppercase;
+}
+.ag-theme-alpine .ag-row {
+
+  border-bottom:
+    1px solid rgba(255,255,255,.03);
+
+  transition: all .2s ease;
+}
+.ag-theme-alpine .ag-row {
+
+  border-bottom:
+    1px solid rgba(255,255,255,.03);
+
+  transition: all .2s ease;
+}
+.task-grid-container {
+  display: flow-root;
+  background:
+    linear-gradient(
+      180deg,
+      #081420,
+      #102437
+    );
+
+  border-radius: 16px;
+
+  padding: 15px;
+
+  border:
+    1px solid rgba(0,255,136,.15);
+
+  box-shadow:
+    0 0 20px rgba(0,255,136,.08);
+}
+.ag-theme-alpine .ag-paging-panel {
+
+  background: #081420;
+
+  color: #00ff88;
+
+  border-top:
+    1px solid rgba(0,255,136,.15);
+}
+.ag-theme-alpine ::-webkit-scrollbar {
+
+  width: 10px;
+  height: 10px;
+}
+
+.ag-theme-alpine ::-webkit-scrollbar-thumb {
+
+  background:
+    linear-gradient(
+      #00ff88,
+      #00cfff
+    );
+
+  border-radius: 20px;
+}
+.status.new, .ag-theme-alpine .row-new{
+  color:#00cfff;
+  font-weight:600;
+}
+
+.status.in_progress, .ag-theme-alpine .row-in_progress{
+  color:#76ec5b;
+  font-weight:600;
+}
+
+.status.on_hold, .ag-theme-alpine .row-on_hold{
+  color:#ffb020;
+  font-weight:600;
+}
+
+.status.finished, .ag-theme-alpine .row-finished{
+  color:#2fb32fa3;
+  font-weight:700;
+}
+
+.status.dropped, .ag-theme-alpine .row-dropped{
+  color:#ff5252;
+  font-weight:700;
+}
+.ag-theme-alpine .ag-row:hover {
+
+    background:
+        rgba(68, 216, 95, 0.127) !important;
+    cursor:pointer;
+
+}
+/* ===============================
+   STATUS ROW COLORS
+================================ */
+
+
+/* .ag-theme-alpine .row-new {
+
+    background:
+        rgba(
+            0,
+            140,
+            255,
+            0.18
+        ) !important;
+
+}
+
+
+
+.ag-theme-alpine .row-in_progress {
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0,180,255,.20),
+            rgba(0,255,136,.20)
+        ) !important;
+
+}
+
+
+
+.ag-theme-alpine .row-finished {
+
+    background:
+        rgba(
+            0,
+            200,
+            120,
+            0.20
+        ) !important;
+
+}
+
+
+
+.ag-theme-alpine .row-dropped {
+
+    background:
+        rgba(
+            255,
+            50,
+            50,
+            0.22
+        ) !important;
+
+}
+
+
+
+.ag-theme-alpine .row-on_hold {
+
+    background:
+        rgba(
+            255,
+            165,
+            0,
+            0.22
+        ) !important;
+
+} */

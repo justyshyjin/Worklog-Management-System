@@ -1,0 +1,28 @@
+.master-wrapper {
+
+    background: #101820;
+
+    border-radius: 12px;
+
+    padding: 20px;
+}
+
+.master-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.master-header button {
+
+    background: #00ff88;
+
+    border: none;
+
+    padding: 10px 20px;
+
+    border-radius: 8px;
+}

@@ -1,0 +1,614 @@
+/* =========================================
+   Add Task Modal Container
+========================================= */
+
+
+.add-task-dialog .MuiPaper-root {
+
+    background:
+        linear-gradient(
+            135deg,
+            #081420c0,
+            #172d41
+        ) !important;
+
+
+    color:
+        #d7f7ff !important;
+
+
+    border:
+        1px solid
+        rgba(
+            0,
+            255,
+            136,
+            0.25
+        );
+
+
+    border-radius:
+        20px !important;
+
+
+    box-shadow:
+
+        0 20px 60px
+        rgba(
+            0,
+            255,
+            136,
+            0.20
+        );
+
+
+    backdrop-filter:
+
+        blur(14px);
+
+
+    overflow:
+
+        hidden;
+
+}
+
+.MuiGrid-root .large-input.task-details{
+  width: 80%;
+}
+
+.large-input.task-description{
+  width:75%;
+}
+
+.large-input.dropdown{
+  width:100%;
+}
+
+.MuiGrid-root.input-grid-field-textarea{
+  width:100%;
+}
+.MuiGrid-root.input-grid-field-dropdown{
+  width: 25%;
+}
+.MuiGrid-root{
+  float: left;
+}
+/* =========================================
+   Dialog Title
+========================================= */
+
+
+.add-task-title {
+
+    color:
+        #00ff88 !important;
+
+
+    font-size:
+        22px !important;
+
+
+    font-weight:
+        700 !important;
+
+
+    padding:
+
+        20px 25px !important;
+
+
+    border-bottom:
+
+        1px solid
+        rgba(
+            0,
+            255,
+            136,
+            0.18
+        );
+
+}
+
+
+
+/* =========================================
+   Dialog Content
+========================================= */
+
+
+.add-task-dialog
+.MuiDialogContent-root {
+
+    padding:
+
+        25px !important;
+
+}
+
+
+/* Grid spacing */
+
+.add-task-dialog
+.MuiGrid-container {
+
+    row-gap:
+
+        18px;
+
+    width: 100%;
+
+}
+
+
+
+/* =========================================
+   Text Inputs
+========================================= */
+
+
+.add-task-dialog
+.MuiOutlinedInput-root {
+
+
+    color:
+
+        #d7f7ff !important;
+
+
+    background:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.04
+        );
+
+
+    border-radius:
+
+        12px;
+
+
+    min-height:
+
+        48px;
+
+
+}
+
+
+
+/* Multiline fields */
+
+.add-task-dialog
+.MuiOutlinedInput-root.MuiInputBase-multiline {
+
+
+    padding:
+
+        12px;
+
+
+}
+
+
+
+.add-task-dialog
+textarea {
+
+
+    line-height:
+
+        1.5;
+
+}
+
+
+
+/* Input border */
+
+
+.add-task-dialog
+.MuiOutlinedInput-root
+fieldset {
+
+
+    border-color:
+
+        rgba(
+            0,
+            255,
+            136,
+            0.25
+        );
+
+}
+
+
+
+/* Hover */
+
+
+.add-task-dialog
+.MuiOutlinedInput-root:hover
+fieldset {
+
+
+    border-color:
+
+        #00ff88 !important;
+
+}
+
+
+
+/* Focus */
+
+
+.add-task-dialog
+.MuiOutlinedInput-root.Mui-focused
+fieldset {
+
+
+    border-color:
+
+        #00cfff !important;
+
+
+    border-width:
+
+        2px;
+
+}
+
+
+
+/* =========================================
+   Labels
+========================================= */
+
+
+.add-task-dialog
+.MuiInputLabel-root {
+
+
+    color:
+
+        #9bb6d4 !important;
+
+}
+
+
+
+.add-task-dialog
+.MuiInputLabel-root.Mui-focused {
+
+
+    color:
+
+        #00ff88 !important;
+
+}
+
+
+
+/* =========================================
+   Select Dropdowns
+========================================= */
+
+
+.add-task-dialog
+.MuiSelect-select {
+
+
+    min-height:
+
+        48px;
+
+
+    display:
+
+        flex;
+
+
+    align-items:
+
+        center;
+
+}
+
+
+
+.add-task-dialog
+.MuiSelect-icon {
+
+
+    color:
+
+        #00ff88 !important;
+
+}
+
+
+
+/* Dropdown menu */
+
+.MuiMenu-paper {
+
+
+    background:
+
+        #102437 !important;
+
+
+    color:
+
+        #d7f7ff !important;
+
+}
+
+
+.MuiMenuItem-root:hover {
+
+
+    background:
+
+        rgba(
+            0,
+            255,
+            136,
+            0.15
+        ) !important;
+
+}
+
+
+
+/* =========================================
+   Error Text
+========================================= */
+
+
+.add-task-dialog
+.MuiFormHelperText-root {
+
+
+    color:
+
+        #ff6b6b !important;
+
+}
+
+
+
+/* =========================================
+   Action Section
+========================================= */
+
+
+.add-task-actions {
+
+
+    border-top:
+
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+
+    padding:
+
+        18px 25px !important;
+
+
+}
+
+
+
+/* =========================================
+   Save Button
+========================================= */
+
+
+.save-task-btn {
+
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #00ff88,
+            #00cfff
+        ) !important;
+
+
+
+    color:
+
+        #081420 !important;
+
+
+
+    font-weight:
+
+        700 !important;
+
+
+
+    border-radius:
+
+        12px !important;
+
+
+
+    padding:
+
+        10px 28px !important;
+
+
+
+    transition:
+
+        all
+        0.25s
+        ease;
+
+}
+
+
+
+.save-task-btn:hover {
+
+
+    transform:
+
+        translateY(-2px);
+
+
+
+    box-shadow:
+
+
+        0 0 20px
+        rgba(
+            0,
+            255,
+            136,
+            0.45
+        );
+
+}
+
+
+
+/* =========================================
+   Cancel Button
+========================================= */
+
+
+.cancel-task-btn {
+
+
+    color:
+
+        #9bb6d4 !important;
+
+
+    font-weight:
+
+        600 !important;
+
+
+    border-radius:
+
+        10px !important;
+
+
+}
+
+
+
+.cancel-task-btn:hover {
+
+
+    background:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.05
+        ) !important;
+
+
+}
+
+
+
+/* =========================================
+   Responsive
+========================================= */
+
+
+@media(max-width:768px){
+
+
+    .add-task-dialog
+    .MuiPaper-root {
+
+
+        margin:
+
+            15px;
+
+
+        width:
+
+            calc(
+                100% - 30px
+            );
+
+    }
+
+
+}
+.add-task-dialog .MuiTextField-root {
+
+    /* width:100%; */
+
+}
+
+
+
+.add-task-dialog 
+.MuiOutlinedInput-root {
+
+    min-height:55px;
+
+    font-size:16px;
+    
+}
+
+
+
+.add-task-dialog 
+.MuiInputLabel-root {
+
+    font-size:16px;
+
+}
+
+
+
+/* Task Details */
+
+.add-task-dialog 
+textarea {
+
+    font-size:16px;
+
+    line-height:1.6;
+
+}
+
+
+
+/* Dropdown height */
+
+.add-task-dialog 
+.MuiSelect-select {
+
+    padding-top:16px;
+
+    padding-bottom:16px;
+
+}
+
+
+

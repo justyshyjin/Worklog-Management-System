@@ -1,0 +1,253 @@
+Working flow:
+------------------
+
+Step 1: Finalize Application Theme
+
+From our previous discussions, your theme is:
+
+Theme Name
+
+Cyber Operations Center
+
+Color Palette
+| Item            | Color                |
+| --------------- | -------------------- |
+| Background      | #0B1220              |
+| Card Background | #111C2D              |
+| Primary Green   | #00FF88              |
+| Primary Blue    | #00CFFF              |
+| Text White      | #EAF4FF              |
+| Muted Text      | #8AA4C8              |
+| Border          | rgba(0,255,136,0.15) |
+| Danger          | #FF5555              |
+| Warning         | #FFC107              |
+
+Visual Style
+
+Think of:
+
+Hacker terminal
+SOC dashboard
+Network monitoring center
+Running code effect
+Glass panels
+Neon glow
+Dark background
+
+Not:
+
+Material UI default look
+White enterprise dashboard
+Bootstrap admin panel
+
+Folder Structure (Start Fresh)
+src/
+
+api/
+├── axiosClient.js
+
+components/
+├── common/
+├── layout/
+├── auth/
+
+pages/
+├── LoginPage.jsx
+├── DashboardPage.jsx
+
+context/
+├── AuthContext.jsx
+
+routes/
+├── ProtectedRoute.jsx
+
+styles/
+├── globals.css
+├── theme.css
+
+App.jsx
+main.jsx
+
+Step 2: Authentication Flow
+
+We build this before any dashboard.
+
+Login Page
+     ↓
+API Login
+     ↓
+Receive JWT Token
+     ↓
+Store token in localStorage
+     ↓
+Update AuthContext
+     ↓
+Redirect Dashboard
+
+
+Pages Required Initially
+Public
+
+/login
+
+Protected
+/
+/dashboard
+
+If user is not logged in:
+/dashboard
+      ↓
+redirect
+      ↓
+/login
+
+Step 3: Login Page Design
+
+Screen Layout
+
+------------------------------------------------
+|                                              |
+|                                              |
+|      WorkLog Management System               |
+|                                              |
+|      [ Username ]                            |
+|                                              |
+|      [ Password ]                            |
+|                                              |
+|      [ LOGIN ]                               |
+|                                              |
+|                                              |
+------------------------------------------------
+
+Background:
+
+Dark Blue Gradient
+
+Animated Code Streams
+
+Green Glow
+
+Blue Glow
+
+Glass Login Card
+
+Login Card Style
+background: rgba(17,28,45,.85);
+
+backdrop-filter: blur(15px);
+
+border: 1px solid rgba(0,255,136,.2);
+
+box-shadow:
+0 0 20px rgba(0,255,136,.15),
+0 0 40px rgba(0,207,255,.08);
+
+border-radius: 20px;
+Login Fields
+
+Username
+
+background:#0B1220;
+border:1px solid rgba(0,255,136,.2);
+color:#fff;
+
+Password
+
+background:#0B1220;
+border:1px solid rgba(0,255,136,.2);
+color:#fff;
+
+Button
+
+background:
+linear-gradient(
+90deg,
+#00FF88,
+#00CFFF
+);
+Step 4: Authentication Context
+
+AuthContext responsibilities:
+
+✓ Login
+✓ Logout
+✓ Store User
+✓ Store JWT
+✓ Check Existing Session
+✓ Redirect Handling
+
+State:
+
+{
+  user,
+  token,
+  isAuthenticated
+}
+Step 5: Route Protection
+
+Example:
+
+<ProtectedRoute>
+  <DashboardPage />
+</ProtectedRoute>
+
+If token missing:
+
+navigate("/login");
+Deliverable for Sprint 1
+
+After Sprint 1 you should have:
+
+✓ Cyber Theme
+
+✓ Login Page
+
+✓ JWT Authentication
+
+✓ AuthContext
+
+✓ Protected Routes
+
+✓ Dashboard Redirect
+
+✓ Logout
+
+✓ Session Persistence
+What I suggest next
+
+Before writing any code, send me:
+
+Your backend login API endpoint
+
+Example:
+POST /api/auth/login
+
+Login request payload
+
+{
+  "username": "",
+  "password": ""
+}
+
+Login response payload
+
+{
+  "access_token": "...",
+  "user": {
+    ...
+  }
+}
+
+Once I have that, I'll generate the complete Sprint 1 code:
+
+main.jsx
+App.jsx
+AuthContext.jsx
+ProtectedRoute.jsx
+axiosClient.js
+LoginPage.jsx
+DashboardPage.jsx
+globals.css
+theme.css
+
+all wired together with the green/blue cyber theme and login redirection.

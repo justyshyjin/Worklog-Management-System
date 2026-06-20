@@ -1,0 +1,22 @@
+.terminal-bg{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:-1;
+
+  opacity:.03;
+
+  color:#00ff88;
+
+  font-size:18px;
+
+  overflow:hidden;
+
+  pointer-events:none;
+
+  padding:50px;
+
+  line-height:35px;
+}

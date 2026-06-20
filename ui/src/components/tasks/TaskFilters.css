@@ -1,0 +1,34 @@
+.filters{
+  display:flex;
+
+  gap:10px;
+
+  margin-bottom:20px;
+}
+
+.filters input,
+.filters select{
+
+  background:#16232f;
+
+  border:1px solid #00ff8830;
+
+  color:white;
+
+  padding:10px;
+
+  border-radius:8px;
+}
+
+.filters button{
+
+  background:#00ff88;
+
+  border:none;
+
+  border-radius:8px;
+
+  padding:10px 20px;
+
+  cursor:pointer;
+}

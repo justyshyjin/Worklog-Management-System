@@ -1,0 +1,308 @@
+Phase 2 - Option 1
+Complete API Specification
+
+This is the contract between:
+
+React Frontend
+        ↕
+FastAPI Backend
+        ↕
+MySQL Database
+
+Once this is finalized:
+
+Backend development becomes straightforward
+Frontend development can start immediately
+No guessing about request/response structures
+Easier testing with Postman
+API Standard
+Base URL
+http://localhost:5000/api
+Authentication APIs
+Login
+POST /api/auth/login
+
+Request
+
+{
+    "username": "admin",
+    "password": "password"
+}
+
+Response
+
+{
+    "success": true,
+    "token": "jwt_token",
+    "user": {
+        "id": 1,
+        "username": "admin",
+        "full_name": "System Administrator",
+        "role": "ADMIN"
+    }
+}
+Logout
+POST /api/auth/logout
+
+Response
+
+{
+    "success": true,
+    "message": "Logged out successfully"
+}
+Current User
+GET /api/auth/profile
+
+Response
+
+{
+    "id": 1,
+    "username": "admin",
+    "full_name": "System Administrator",
+    "role": "ADMIN"
+}
+Dashboard APIs
+Dashboard Statistics
+GET /api/dashboard/stats
+
+Response
+
+{
+    "total_tasks": 150,
+    "weekly_tasks": 12,
+    "monthly_tasks": 58,
+    "yearly_tasks": 150,
+
+    "weekly_hours": 35.5,
+    "monthly_hours": 142.75,
+
+    "new_tasks": 4,
+    "pending_tasks": 3,
+    "in_progress_tasks": 8,
+    "finished_tasks": 132,
+    "dropped_tasks": 3,
+
+    "jira_logged": 120,
+    "jira_not_logged": 30
+}
+Dashboard Charts
+GET /api/dashboard/charts
+
+Response
+
+{
+    "status_distribution": [],
+    "project_distribution": [],
+    "platform_distribution": [],
+    "task_type_distribution": [],
+    "task_source_distribution": [],
+    "weekly_trend": [],
+    "monthly_trend": []
+}
+Task APIs
+Get Task List
+GET /api/tasks
+
+Query Parameters
+
+?page=1
+&limit=20
+
+&project_id=1
+&status_id=3
+&platform_id=2
+&task_type_id=1
+&task_source_id=4
+&assigned_to=1
+
+&date_from=2026-06-01
+&date_to=2026-06-30
+
+&search=deployment
+
+Response
+
+{
+    "total": 250,
+    "page": 1,
+    "records": []
+}
+Get Single Task
+GET /api/tasks/{id}
+
+Response
+
+{
+    "id": 125,
+    "task_details": "Deploy ACS Build",
+    "project": "ACS",
+    "status": "IN PROGRESS",
+    "assigned_to": "Justy"
+}
+Create Task
+POST /api/tasks
+
+Request
+
+{
+    "task_details": "Deploy ACS Build",
+
+    "project_id": 1,
+
+    "task_source_id": 4,
+
+    "assigned_to": 1,
+
+    "task_status_id": 1,
+
+    "task_type_id": 2,
+
+    "platform_id": 1,
+
+    "jira_logged": "NO",
+
+    "work_description": "Need to deploy latest build",
+
+    "remarks": ""
+}
+
+Response
+
+{
+    "success": true,
+    "task_id": 125
+}
+Update Task
+PUT /api/tasks/{id}
+
+Request
+
+{
+    "task_details": "Updated Task",
+
+    "project_id": 2,
+
+    "task_status_id": 3
+}
+Delete Task
+DELETE /api/tasks/{id}
+
+Response
+
+{
+    "success": true
+}
+Quick Status Change
+
+Action Button API
+
+PATCH /api/tasks/{id}/status
+
+Request
+
+{
+    "status_id": 3
+}
+
+Response
+
+{
+    "success": true
+}
+Worklog APIs
+Add Worklog
+POST /api/tasks/{id}/worklog
+
+Request
+
+{
+    "work_date": "2026-06-03",
+    "minutes_spent": 90,
+    "description": "Deployment completed"
+}
+Get Worklogs
+GET /api/tasks/{id}/worklogs
+Attachment APIs
+Upload Attachment
+POST /api/tasks/{id}/attachments
+
+Multipart Form
+
+file=document.pdf
+Get Attachments
+GET /api/tasks/{id}/attachments
+Master APIs
+
+Same CRUD pattern for:
+
+Projects
+Platforms
+Task Types
+Task Sources
+Task Status
+Users
+Project APIs
+List
+GET /api/projects
+Create
+POST /api/projects
+
+Request
+
+{
+    "project_name": "ACS",
+    "description": "ACS Migration Project",
+    "platforms": [1,2,3]
+}
+Update
+PUT /api/projects/{id}
+Delete
+DELETE /api/projects/{id}
+Settings APIs
+Get Settings
+GET /api/settings
+Save Settings
+PUT /api/settings
+
+Request
+
+{
+    "DEFAULT_PLATFORM": 1,
+    "DEFAULT_TASK_STATUS": 1,
+    "DEFAULT_JIRA_LOGGED": "NO"
+}
+Reports APIs
+Export Excel
+POST /api/reports/export/excel
+
+Request
+
+{
+    "filters": {}
+}
+
+Response
+
+{
+    "file_url": "/exports/report.xlsx"
+}
+Export CSV
+POST /api/reports/export/csv
+Export PDF
+POST /api/reports/export/pdf
+Audit APIs
+System Logs
+GET /api/logs/system
+
+Filters
+
+user_id
+module
+action
+date_from
+date_to
+Error Logs
+GET /api/logs/errors
+User Session APIs
+Login History
+GET /api/users/{id}/login-history
