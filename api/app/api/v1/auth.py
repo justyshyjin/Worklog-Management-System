@@ -55,7 +55,10 @@ def me(
 
 @router.post("/logout")
 def logout():
-
+    
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    
     return {
         "success": True
     }

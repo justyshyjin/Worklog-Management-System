@@ -34,14 +34,10 @@ const taskService = {
     ),
 
   changeStatus: (
-    id,
-    task_status_id
+    id
   ) =>
     axiosClient.patch(
-      `/tasks/${id}/status`,
-      {
-        task_status_id
-      }
+      `/tasks/${id}/status`
     ),
 
   getTaskStats: () =>

@@ -50,7 +50,7 @@ const ViewTaskModal = ({
         </Typography>
 
         <Typography>
-          <b>Hours:</b>
+          <b>Hourss:</b>
           {" "}
           {task.hours}
         </Typography>

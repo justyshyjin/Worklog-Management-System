@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import SnackbarAlert from "../common/SnackbarAlert";
 
 import TaskActions from "./TaskActions";
 
@@ -12,7 +13,6 @@ import AdvancedTaskFilters from "../filters/AdvancedTaskFilters";
 
 import ExportToolbar from "../export/ExportToolbar";
 
-import { useTasks } from "../../context/TaskContext";
 import taskService from "../../api/taskService";
 
 import ViewTask from "../modals/ViewTask";
@@ -46,29 +46,71 @@ const TaskGrid = () => {
 
 
 
-  const {
-    tasks,
-    fetchTasks
-  } = useTasks();
+  // const {
+  //   tasks,
+  //   fetchTasks
+  // } = useTasks();
 
+  const [tasks, setTasks] = useState([]);
 
+  const [alert, setAlert] = useState({
+
+    open: false,
+
+    message: "",
+
+    severity: ""
+
+  });
+
+  const [loading, setLoading] =
+    useState(false);
 
   const [
     viewOpen,
     setViewOpen
   ] = useState(false);
 
-
-
   const [
     selectedTask,
     setSelectedTask
   ] = useState(null);
 
+  const fetchTasks = useCallback(
+    async () => {
 
+      try {
+
+        setLoading(true);
+
+        const response =
+          await taskService.getTasks();
+
+        setTasks(
+          response.data
+        );
+
+      }
+      catch (error) {
+
+        console.error(
+          error
+        );
+
+      }
+      finally {
+
+        setLoading(false);
+
+      }
+
+    },
+    []
+  );
 
   useEffect(() => {
 
+    fetchTasks();
 
     const refreshTasks = () => {
 
@@ -101,33 +143,84 @@ const TaskGrid = () => {
 
 
 
-  const handleStatusChange =
-    async (row, newStatus) => {
+  const handleStatusChange = async (row) => {
+
+    try {
+
+      const response = await taskService.changeStatus(
+        row.id
+      );
 
 
-      try {
+      await fetchTasks();
 
+      // console.log(response.data);
+      
+      setAlert({
 
-        await taskService.changeStatus(
-          row.id,
-          newStatus
-        );
+        open: true,
 
+        message:
+          response.data.message,
 
-        await fetchTasks();
+        severity:
+          "success",
 
+        duration: 3000,
+
+        onClose: () => {
+
+          setAlert(prev => ({
+            ...prev,
+            open: false
+          }));
+
+        }
+
+      });
+
+    }
+    catch (error) {
+
+      handleStatusBlocked(
+        error.response.data.detail
+      );
+      console.error(
+        "Status change failed",
+        error
+      );
+
+    }
+
+  };
+
+  const handleStatusBlocked = (
+    message
+  ) => {
+
+    setAlert({
+
+      open: true,
+
+      message,
+
+      severity:
+        "warning",
+
+      duration: 3000,
+
+      onClose: () => {
+
+        setAlert(prev => ({
+          ...prev,
+          open: false
+        }));
 
       }
-      catch(error){
 
-        console.error(error);
+    });
 
-      }
-
-
-    };
-
-
+  };
 
 
 
@@ -160,15 +253,11 @@ const TaskGrid = () => {
     };
 
 
-
-
-
   const handleDelete =
-    async(row)=>{
+    async (row) => {
 
 
       try {
-
 
         await taskService.deleteTask(
           row.id
@@ -182,7 +271,7 @@ const TaskGrid = () => {
 
 
       }
-      catch(error){
+      catch (error) {
 
         console.error(error);
 
@@ -192,39 +281,36 @@ const TaskGrid = () => {
     };
 
 
-
-
-
   const columns = [
 
     {
-      field:"id",
-      headerName:"ID",
-      width:80
+      field: "id",
+      headerName: "ID",
+      width: 80
     },
 
 
     {
-      field:"task_details",
-      headerName:"Task",
-      flex:2
+      field: "task_details",
+      headerName: "Task",
+      flex: 2
     },
 
 
     {
-      field:"project",
-      headerName:"Project",
-      width:150
+      field: "project",
+      headerName: "Project",
+      width: 150
     },
 
 
     {
-      field:"task_status",
-      headerName:"Status",
-      width:150,
+      field: "task_status",
+      headerName: "Status",
+      width: 150,
 
 
-      cellRenderer:(params)=>{
+      cellRenderer: (params) => {
 
 
         const value =
@@ -234,14 +320,14 @@ const TaskGrid = () => {
         const cls =
           "status " +
           value
-          .toLowerCase()
-          .replace(
-            /\s+/g,
-            "_"
-          );
+            .toLowerCase()
+            .replace(
+              /\s+/g,
+              "_"
+            );
 
 
-        return(
+        return (
 
           <span className={cls}>
 
@@ -259,33 +345,33 @@ const TaskGrid = () => {
 
 
     {
-      field:"task_type",
-      headerName:"Type",
-      width:150
+      field: "task_type",
+      headerName: "Type",
+      width: 150
     },
 
 
     {
-      field:"task_source",
-      headerName:"Task Source",
-      width:150
+      field: "task_source",
+      headerName: "Task Source",
+      width: 150
     },
 
 
     {
-      field:"total_minutes",
-      headerName:"Hours",
-      width:120
+      field: "total_minutes",
+      headerName: "Hours",
+      width: 120
     },
 
 
     {
-      headerName:"Actions",
+      headerName: "Actions",
 
-      width:160,
+      width: 160,
 
 
-      cellRenderer:(params)=>(
+      cellRenderer: (params) => (
 
         <TaskActions
 
@@ -294,7 +380,9 @@ const TaskGrid = () => {
           onStatusChange={
             handleStatusChange
           }
-
+          onStatusBlocked={
+            handleStatusBlocked
+          }
           onEdit={
             handleEdit
           }
@@ -317,27 +405,27 @@ const TaskGrid = () => {
 
 
 
-return (
+  return (
 
-<div className="task-grid-container">
-
-
-<div className="export-toolbar">
+    <div className="task-grid-container">
 
 
-<ExportToolbar
-
-rowData={tasks}
-
-selectedRows={selectedRows}
-
-/>
+      <div className="export-toolbar">
 
 
-</div>
+        <ExportToolbar
+
+          rowData={tasks}
+
+          selectedRows={selectedRows}
+
+        />
 
 
-{/* <QuickReports
+      </div>
+
+
+      {/* <QuickReports
 onSelect={(data)=>
 setFilters({
 ...filters,
@@ -348,7 +436,7 @@ setFilters({
 
 
 
-{/* <SavedFilters
+      {/* <SavedFilters
 onSelect={(saved)=>
 setFilters(
 saved.filter_json
@@ -358,7 +446,7 @@ saved.filter_json
 
 
 
-{/* <AdvancedTaskFilters
+      {/* <AdvancedTaskFilters
 filters={filters}
 setFilters={setFilters}
 onApply={fetchTasks}
@@ -383,149 +471,149 @@ fetchTasks();
 
 
 
-<div
+      <div
 
-className="ag-theme-alpine"
+        className="ag-theme-alpine"
 
-style={{
-height:"600px",
-width:"100%"
-}}
+        style={{
+          height: "600px",
+          width: "100%"
+        }}
 
->
+      >
 
 
-<AgGridReact
+        <AgGridReact
 
 
-theme="legacy"
+          theme="legacy"
 
 
-ref={gridRef}
+          ref={gridRef}
 
 
-rowData={tasks}
+          rowData={tasks}
 
 
-columnDefs={columns}
+          columnDefs={columns}
 
 
-pagination={true}
+          pagination={true}
 
 
-paginationPageSize={20}
+          paginationPageSize={20}
 
 
-onRowClicked={handleView}
+          onRowClicked={(params) => {
 
+            if (
+              params.event.target.closest(
+                ".task-actions"
+              )
+            ) {
+              return;
+            }
 
+            handleView(params);
 
-rowSelection={{
-mode:"multiRow",
-checkboxes:true,
-headerCheckbox:true
-}}
+          }}
 
+          rowSelection={{
+            mode: "multiRow",
+            checkboxes: true,
+            headerCheckbox: true
+          }}
 
 
-onSelectionChanged={()=>{
 
+          onSelectionChanged={() => {
 
-const selected =
-gridRef.current.api
-.getSelectedRows();
+            const selected =
+              gridRef.current.api
+                .getSelectedRows();
 
 
-setSelectedRows(
-selected
-);
+            setSelectedRows(
+              selected
+            );
 
+          }}
 
-}}
+          getRowClass={(params) => {
 
+            const status =
+              params.data?.task_status
+                ?.toLowerCase()
+                .replace(
+                  /\s+/g,
+                  "_"
+                );
 
 
-getRowClass={(params)=>{
+            return status
+              ?
+              `row-${status}`
+              :
+              "";
 
 
-const status =
-params.data?.task_status
-?.toLowerCase()
-.replace(
- /\s+/g,
- "_"
-);
+          }}
 
 
-return status
-?
-`row-${status}`
-:
-"";
+        />
 
 
-}}
+      </div>
 
 
-/>
 
 
-</div>
 
+      <ViewTask
 
 
+        open={viewOpen}
 
 
-<ViewTask
+        onClose={() =>
 
+          setViewOpen(false)
 
-open={viewOpen}
+        }
 
+        task={selectedTask}
 
-onClose={()=>
+        onEdit={() => {
 
+          handleEdit(
+            selectedTask
+          );
 
-setViewOpen(false)
+        }}
 
+        onDelete={() => {
 
-}
 
+          handleDelete(
+            selectedTask
+          );
 
-task={selectedTask}
 
+        }}
 
 
-onEdit={()=>{
 
+      />
 
-handleEdit(
-selectedTask
-);
 
+      <SnackbarAlert
 
-}}
+        alert={alert}
 
+      />
+    </div>
 
-
-onDelete={()=>{
-
-
-handleDelete(
-selectedTask
-);
-
-
-}}
-
-
-
-/>
-
-
-
-</div>
-
-);
+  );
 
 
 };

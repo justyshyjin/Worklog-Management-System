@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { TextField, Button, Paper, Typography, Box } from "@mui/material";
 
-import { Navigate } from "react-router-dom";
+import { Navigate,useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -11,8 +11,11 @@ import axiosClient from "../api/axiosClient";
 import "../styles/loginpage.css";
 
 const LoginPage = () => {
+  
 
-  const { login } =
+  const { login,
+          isAuthenticated
+        } =
     useAuth();
 
   const [username,
@@ -32,9 +35,6 @@ const LoginPage = () => {
       e.preventDefault();
 
       try {
-        /*
-        Replace with your API
-        */
 
         const response =
           await axiosClient.post(
@@ -50,7 +50,9 @@ const LoginPage = () => {
           response.data.user
         );
 
-        navigate("/");
+        navigate("/",{
+                replace:true
+            });
       } catch (err) {
         setError(
           "Invalid username or password"
@@ -58,7 +60,9 @@ const LoginPage = () => {
       }
     };
 
-  const { isAuthenticated } = useAuth();
+  const {  } = useAuth();
+
+  // const navigate = useNavigate();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;

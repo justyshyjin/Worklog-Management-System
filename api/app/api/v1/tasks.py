@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy import func
 from app.models.tasks import Tasks
 from app.schemas.tasks import TaskCreate
@@ -43,7 +43,7 @@ def get_tasks(
             )
             
         tasks = query.all()
-
+        
         result = []
 
         for task in tasks:
@@ -242,6 +242,160 @@ async def createtask(
         db.rollback()
 
         raise e
+
+
+    finally:
+
+        db.close()
+        
+@router.patch("/{task_id}/status")
+def change_task_status(
+    task_id: int,
+    current_user = Depends(get_current_user)
+):
+    db = SessionLocal()
+    
+    try:
+        # ---------------------------------
+        # Get Task
+        # ---------------------------------
+        task = (
+            db.query(Tasks).filter(
+                Tasks.id==task_id
+            ).first()
+            )
+        if not task:
+
+            raise HTTPException(
+                status_code=404,
+                detail=f"Task not found"
+            )
+        
+        # ---------------------------------
+        # Current Status
+        # ---------------------------------
+        
+        old_status = task.task_status_id
+            
+        if not old_status:
+
+            raise HTTPException(
+                status_code=400,
+                detail=f"Current status not found"
+            )
+        
+        if old_status==3:
+            raise HTTPException(
+                status_code=301,
+                detail=f"This task is already finished. Please edit the task to change the status in need."
+            )
+        # ---------------------------------
+        # Determine Next Status
+        # ---------------------------------
+        
+        status_flow = {
+
+            1: 2,   # NEW -> IN_PROGRESS
+
+            2: 3    # IN_PROGRESS -> FINISHED
+
+        }
+
+        
+        new_status = status_flow.get(
+            task.task_status_id
+        )
+        
+        if not new_status:
+
+            raise HTTPException(
+
+                status_code=400,
+
+                detail=
+                f"Status change not allowed"
+
+            )
+
+
+
+
+        # ---------------------------------
+        # Update Task
+        # ---------------------------------
+
+        task.task_status_id = (
+            new_status
+        )
+
+        task.updated_by = (
+            current_user.id
+        )
+
+        task.updated_date = (
+            datetime.now()
+        )
+
+        # ---------------------------------
+        # Task History Entry
+        # ---------------------------------
+
+        history = Taskhistory(
+
+            task_id =
+                task.id,
+
+            old_status_id =
+                old_status,
+
+            new_status_id =
+                new_status,
+
+            old_assigned_to =
+                task.assigned_to,
+
+            new_assigned_to =
+                task.assigned_to,
+            
+            comments="Status Changed",
+
+            changed_by =
+                current_user.id,
+
+            changed_at =
+                datetime.now()
+
+        )
+
+
+        db.add(history)
+
+
+
+        db.commit()
+
+
+        db.refresh(task)
+
+
+
+        return {
+            "success":True,
+
+            "message":
+                "Task status updated successfully",
+
+            "task_id":
+                task.id,
+
+            "old_status":
+                old_status,
+
+            "new_status":
+                new_status
+
+        }
+
 
 
     finally:
