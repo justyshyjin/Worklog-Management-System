@@ -9,6 +9,7 @@ from app.database import SessionLocal
 from app.auth.dependencies import get_current_user
 from datetime import datetime
 from app.models.taskhistory import Taskhistory
+from app.util.formatters import calculate_working_minutes
 
 import re
 
@@ -323,11 +324,29 @@ def change_task_status(
         # ---------------------------------
         # Update Task
         # ---------------------------------
+        STATUS_IN_PROGRESS = 2
+        STATUS_FINISHED = 3
 
+        now = datetime.now()
+        
         task.task_status_id = (
             new_status
         )
-
+        
+        if new_status==STATUS_IN_PROGRESS:
+            task.started_date = (
+               now
+            )
+        
+        if new_status==STATUS_FINISHED:
+            task.completed_date = (
+                now
+            )
+            task.total_minutes = calculate_working_minutes(
+                task.started_date,
+                now
+            )
+            
         task.updated_by = (
             current_user.id
         )

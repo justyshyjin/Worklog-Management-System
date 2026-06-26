@@ -11,10 +11,11 @@ import QuickReports from "../filters/QuickReports";
 import SavedFilters from "../filters/SavedFilters";
 import AdvancedTaskFilters from "../filters/AdvancedTaskFilters";
 
+import { dateTimeColumn } from "../../utils/formatter";
+
 import ExportToolbar from "../export/ExportToolbar";
-
 import taskService from "../../api/taskService";
-
+import TaskTimer from "../common/TaskTimer";
 import ViewTask from "../modals/ViewTask";
 
 import "../../styles/TaskGrid.css";
@@ -154,6 +155,10 @@ const TaskGrid = () => {
 
       await fetchTasks();
 
+      window.dispatchEvent(
+          new Event("taskstatus-changed")
+      );
+
       // console.log(response.data);
       
       setAlert({
@@ -286,7 +291,7 @@ const TaskGrid = () => {
     {
       field: "id",
       headerName: "ID",
-      width: 80
+      width: 60
     },
 
 
@@ -307,7 +312,7 @@ const TaskGrid = () => {
     {
       field: "task_status",
       headerName: "Status",
-      width: 150,
+      width: 140,
 
 
       cellRenderer: (params) => {
@@ -347,21 +352,52 @@ const TaskGrid = () => {
     {
       field: "task_type",
       headerName: "Type",
-      width: 150
+      width: 130
     },
 
 
     {
       field: "task_source",
       headerName: "Task Source",
-      width: 150
+      width: 130
     },
-
+    dateTimeColumn("started_date","Started At"),
+    dateTimeColumn("completed_date", "Completed At"),
+    // {
+    //   field: "completed_date",
+    //   headerName: "Completed At",
+    //   width: 150,
+    //   valueFormatter: (params) => {
+    //     return params.value ? formatDateTimeLong(params.value) : "";
+    //   }
+    // },
 
     {
       field: "total_minutes",
       headerName: "Hours",
-      width: 120
+      width: 120,
+      cellRenderer:(params)=>{
+        return (
+
+            <TaskTimer
+
+                status={
+                    params.data.task_status
+                }
+
+                startedDate={
+                    params.data.started_date
+                }
+
+                totalMinutes={
+                    params.data.total_minutes
+                }
+
+            />
+
+        );
+
+    }
     },
 
 

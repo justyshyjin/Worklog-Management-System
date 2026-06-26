@@ -1,0 +1,53 @@
+.task-running-time {
+
+    animation:
+        taskTimerBlink 1s infinite;
+
+    font-weight:
+        600;
+
+}
+
+
+@keyframes taskTimerBlink {
+
+    0% {
+        opacity:1;
+    }
+
+
+    50% {
+        opacity:0.35;
+    }
+
+
+    100% {
+        opacity:1;
+    }
+
+}
+
+
+.running-time {
+
+    animation:
+        blink 1s infinite;
+
+}
+
+
+@keyframes blink {
+
+    0% {
+        opacity:1;
+    }
+
+    50% {
+        opacity:0.3;
+    }
+
+    100% {
+        opacity:1;
+    }
+
+}

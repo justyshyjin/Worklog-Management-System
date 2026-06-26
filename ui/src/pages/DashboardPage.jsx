@@ -31,16 +31,30 @@ const DashboardPage = () => {
             loadStats();
         };
 
-        window.addEventListener(
+        const events = [
             "task-created",
-            refreshStats
-        );
-        return () => {
+            "taskstatus-changed"
+        ];
 
-            window.removeEventListener(
-                "task-created",
+        events.forEach(event => {
+
+            window.addEventListener(
+                event,
                 refreshStats
             );
+
+        });
+
+        return () => {
+
+            events.forEach(event => {
+
+                window.removeEventListener(
+                    event,
+                    refreshStats
+                );
+
+            });
 
         };
   }, []);
