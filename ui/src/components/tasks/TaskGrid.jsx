@@ -1,91 +1,107 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
-
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import SnackbarAlert from "../common/SnackbarAlert";
-
 import TaskActions from "./TaskActions";
-
 import QuickReports from "../filters/QuickReports";
 import SavedFilters from "../filters/SavedFilters";
-import AdvancedTaskFilters from "../filters/AdvancedTaskFilters";
-
+import FilterPanel from "../filters/FilterPanel";
+import { filterConfigs } from "../../utils/filterConfig";
 import { dateTimeColumn } from "../../utils/formatter";
-
 import ExportToolbar from "../export/ExportToolbar";
 import taskService from "../../api/taskService";
 import TaskTimer from "../common/TaskTimer";
 import ViewTask from "../modals/ViewTask";
-
 import "../../styles/TaskGrid.css";
 
 
 const TaskGrid = () => {
 
-
   const gridRef = useRef();
-
-
 
   const [selectedRows, setSelectedRows] =
     useState([]);
 
-
-
+  const defaultFilters = {
+    search: "",
+    status: "",
+    project: "",
+    platform: "",
+    created_from: "",
+    created_to: "",
+    min_hours: "",
+    max_hours: ""
+  };
   const [filters, setFilters] =
+    useState(defaultFilters);
+
+
+
+  const [filterOptions, setFilterOptions] =
     useState({
-      search: "",
-      status: "",
-      project: "",
-      platform: "",
-      created_from: "",
-      created_to: "",
-      min_hours: "",
-      max_hours: ""
+      statuses: [],
+      projects: [],
+      platforms: []
     });
 
+  const [tasks, setTasks] =
+    useState([]);
 
-
-  // const {
-  //   tasks,
-  //   fetchTasks
-  // } = useTasks();
-
-  const [tasks, setTasks] = useState([]);
-
-  const [alert, setAlert] = useState({
-
-    open: false,
-
-    message: "",
-
-    severity: ""
-
-  });
+  const [alert, setAlert] =
+    useState({
+      open: false,
+      message: "",
+      severity: ""
+    });
 
   const [loading, setLoading] =
     useState(false);
 
-  const [
-    viewOpen,
-    setViewOpen
-  ] = useState(false);
+  const [viewOpen, setViewOpen] =
+    useState(false);
 
-  const [
-    selectedTask,
-    setSelectedTask
-  ] = useState(null);
-
-  const fetchTasks = useCallback(
+  const [selectedTask, setSelectedTask] =
+    useState(null);
+  /*
+      Load dynamic filter values
+      Status / Project / Platform
+  */
+  const loadFilterOptions = useCallback(
     async () => {
+      try {
+        const response =
+          await taskService.getFilterOptions();
+
+        setFilterOptions(
+          response.data
+        );
+
+      }
+      catch (error) {
+        console.error(
+          "Filter option loading failed",
+          error
+        );
+      }
+
+    },
+    []
+  );
+  /*
+      Fetch tasks using filters
+  */
+  const fetchTasks = useCallback(
+    async (filters = {}) => {
 
       try {
 
         setLoading(true);
 
         const response =
-          await taskService.getTasks();
+          await taskService.getTasks(
+            filters
+          );
 
         setTasks(
           response.data
@@ -108,10 +124,26 @@ const TaskGrid = () => {
     },
     []
   );
-
+  /*
+      Initial load
+      Filter change reload
+  */
   useEffect(() => {
 
-    fetchTasks();
+    fetchTasks(
+      filters
+    );
+
+  }, [
+    filters,
+    fetchTasks
+  ]);
+  /*
+      Load filter dropdown values once
+  */
+  useEffect(() => {
+
+
 
     const refreshTasks = () => {
 
@@ -128,58 +160,45 @@ const TaskGrid = () => {
 
     return () => {
 
-
       window.removeEventListener(
         "task-created",
         refreshTasks
       );
 
-
     };
 
 
-  }, [fetchTasks]);
-
-
-
-
+  }, [
+    fetchTasks
+  ]);
 
   const handleStatusChange = async (row) => {
-
     try {
 
-      const response = await taskService.changeStatus(
-        row.id
-      );
+      const response =
+        await taskService.changeStatus(
+          row.id
+        );
 
-
-      await fetchTasks();
+      await fetchTasks(filters);
 
       window.dispatchEvent(
-          new Event("taskstatus-changed")
+        new Event("taskstatus-changed")
       );
 
-      // console.log(response.data);
-      
       setAlert({
-
         open: true,
-
         message:
           response.data.message,
-
         severity:
           "success",
-
         duration: 3000,
 
         onClose: () => {
-
           setAlert(prev => ({
             ...prev,
             open: false
           }));
-
         }
 
       });
@@ -190,6 +209,7 @@ const TaskGrid = () => {
       handleStatusBlocked(
         error.response.data.detail
       );
+
       console.error(
         "Status change failed",
         error
@@ -198,93 +218,66 @@ const TaskGrid = () => {
     }
 
   };
-
   const handleStatusBlocked = (
     message
   ) => {
 
     setAlert({
-
       open: true,
-
       message,
-
-      severity:
-        "warning",
-
+      severity: "warning",
       duration: 3000,
 
       onClose: () => {
-
         setAlert(prev => ({
           ...prev,
           open: false
         }));
-
       }
 
     });
 
   };
 
+  const handleView = (params) => {
 
+    setSelectedTask(
+      params.data
+    );
 
-  const handleView =
-    (params) => {
+    setViewOpen(true);
 
+  };
+  const handleEdit = (row) => {
 
-      setSelectedTask(
-        params.data
+    console.log(
+      "Edit",
+      row
+    );
+
+  };
+  const handleDelete = async (row) => {
+
+    try {
+
+      await taskService.deleteTask(
+        row.id
       );
 
+      setViewOpen(false);
 
-      setViewOpen(true);
+      await fetchTasks(filters);
 
+    }
+    catch (error) {
 
-    };
-
-
-
-
-
-  const handleEdit =
-    (row) => {
-
-      console.log(
-        "Edit",
-        row
+      console.error(
+        error
       );
 
-    };
+    }
 
-
-  const handleDelete =
-    async (row) => {
-
-
-      try {
-
-        await taskService.deleteTask(
-          row.id
-        );
-
-
-        setViewOpen(false);
-
-
-        await fetchTasks();
-
-
-      }
-      catch (error) {
-
-        console.error(error);
-
-      }
-
-
-    };
-
+  };
 
   const columns = [
 
@@ -294,13 +287,11 @@ const TaskGrid = () => {
       width: 60
     },
 
-
     {
       field: "task_details",
       headerName: "Task",
       flex: 2
     },
-
 
     {
       field: "project",
@@ -308,19 +299,15 @@ const TaskGrid = () => {
       width: 150
     },
 
-
     {
       field: "task_status",
       headerName: "Status",
       width: 140,
 
-
       cellRenderer: (params) => {
-
 
         const value =
           params.value || "";
-
 
         const cls =
           "status " +
@@ -331,23 +318,15 @@ const TaskGrid = () => {
               "_"
             );
 
-
         return (
-
           <span className={cls}>
-
             {value}
-
           </span>
-
         );
-
 
       }
 
-
     },
-
 
     {
       field: "task_type",
@@ -355,70 +334,71 @@ const TaskGrid = () => {
       width: 130
     },
 
-
     {
       field: "task_source",
       headerName: "Task Source",
       width: 130
     },
-    dateTimeColumn("started_date","Started At"),
-    dateTimeColumn("completed_date", "Completed At"),
-    // {
-    //   field: "completed_date",
-    //   headerName: "Completed At",
-    //   width: 150,
-    //   valueFormatter: (params) => {
-    //     return params.value ? formatDateTimeLong(params.value) : "";
-    //   }
-    // },
 
+    dateTimeColumn(
+      "started_date",
+      "Started At"
+    ),
+
+    dateTimeColumn(
+      "completed_date",
+      "Completed At"
+    ),
     {
       field: "total_minutes",
       headerName: "Hours",
       width: 120,
-      cellRenderer:(params)=>{
+
+      cellRenderer: (params) => {
+
         return (
+          <TaskTimer
 
-            <TaskTimer
+            status={
+              params.data.task_status
+            }
 
-                status={
-                    params.data.task_status
-                }
+            startedDate={
+              params.data.started_date
+            }
 
-                startedDate={
-                    params.data.started_date
-                }
+            totalMinutes={
+              params.data.total_minutes
+            }
 
-                totalMinutes={
-                    params.data.total_minutes
-                }
-
-            />
-
+          />
         );
 
-    }
+      }
+
     },
-
-
     {
+
       headerName: "Actions",
 
       width: 160,
-
 
       cellRenderer: (params) => (
 
         <TaskActions
 
-          row={params.data}
+          row={
+            params.data
+          }
 
           onStatusChange={
             handleStatusChange
           }
+
           onStatusBlocked={
             handleStatusBlocked
           }
+
           onEdit={
             handleEdit
           }
@@ -431,115 +411,102 @@ const TaskGrid = () => {
 
       )
 
-
     }
 
-
   ];
-
-
-
-
-
   return (
-
     <div className="task-grid-container">
 
+      <div className="task_filters">
 
-      <div className="export-toolbar">
+        {/* <QuickReports
+          onSelect={(data) =>
+            setFilters(prev => ({
+              ...prev,
+              ...data
+            }))
+          }
+        /> */}
 
+        <SavedFilters
+          module="tasks"
+          onSelect={(saved) =>
+            setFilters(
+              saved.filter_json
+            )
+          }
+        />
+        <FilterPanel
 
-        <ExportToolbar
+          filters={
+            filters
+          }
 
-          rowData={tasks}
+          setFilters={
+            setFilters
+          }
 
-          selectedRows={selectedRows}
+          fields={
+            filterConfigs.tasks
+          }
+
+          options={
+            filterOptions
+          }
+
+          onReset={() => {
+
+            setFilters(
+              defaultFilters
+            );
+
+          }}
 
         />
 
+      </div>
+
+      <div className="export-toolbar">
+
+        <ExportToolbar
+
+          rowData={
+            tasks
+          }
+
+          selectedRows={
+            selectedRows
+          }
+
+        />
 
       </div>
 
-
-      {/* <QuickReports
-onSelect={(data)=>
-setFilters({
-...filters,
-...data
-})
-}
-/> */}
-
-
-
-      {/* <SavedFilters
-onSelect={(saved)=>
-setFilters(
-saved.filter_json
-)
-}
-/> */}
-
-
-
-      {/* <AdvancedTaskFilters
-filters={filters}
-setFilters={setFilters}
-onApply={fetchTasks}
-onReset={()=>{
-setFilters({
-search:"",
-status:"",
-project:"",
-platform:"",
-created_from:"",
-created_to:"",
-min_hours:"",
-max_hours:""
-});
-
-fetchTasks();
-
-}}
-/> */}
-
-
-
-
-
       <div
-
         className="ag-theme-alpine"
-
         style={{
           height: "600px",
           width: "100%"
         }}
-
       >
-
 
         <AgGridReact
 
-
           theme="legacy"
 
+          ref={
+            gridRef
+          }
+          rowData={
+            tasks
+          }
 
-          ref={gridRef}
-
-
-          rowData={tasks}
-
-
-          columnDefs={columns}
-
-
+          columnDefs={
+            columns
+          }
           pagination={true}
 
-
           paginationPageSize={20}
-
-
           onRowClicked={(params) => {
 
             if (
@@ -550,24 +517,21 @@ fetchTasks();
               return;
             }
 
-            handleView(params);
+            handleView(
+              params
+            );
 
           }}
-
           rowSelection={{
             mode: "multiRow",
             checkboxes: true,
             headerCheckbox: true
           }}
-
-
-
           onSelectionChanged={() => {
 
             const selected =
               gridRef.current.api
                 .getSelectedRows();
-
 
             setSelectedRows(
               selected
@@ -585,40 +549,28 @@ fetchTasks();
                   "_"
                 );
 
-
             return status
-              ?
-              `row-${status}`
-              :
-              "";
-
+              ? `row-${status}`
+              : "";
 
           }}
-
-
         />
-
 
       </div>
 
-
-
-
-
       <ViewTask
 
-
-        open={viewOpen}
-
-
-        onClose={() =>
-
-          setViewOpen(false)
-
+        open={
+          viewOpen
         }
 
-        task={selectedTask}
+        onClose={() =>
+          setViewOpen(false)
+        }
 
+        task={
+          selectedTask
+        }
         onEdit={() => {
 
           handleEdit(
@@ -629,30 +581,26 @@ fetchTasks();
 
         onDelete={() => {
 
-
           handleDelete(
             selectedTask
           );
 
-
         }}
 
-
-
       />
-
 
       <SnackbarAlert
 
-        alert={alert}
+        alert={
+          alert
+        }
 
       />
+
     </div>
 
   );
 
-
 };
-
 
 export default TaskGrid;

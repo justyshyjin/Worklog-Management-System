@@ -1,16 +1,21 @@
-from fastapi import APIRouter,Depends,HTTPException
-from sqlalchemy import func
-from app.models.tasks import Tasks
+from fastapi import APIRouter,Depends,HTTPException,Query
+from datetime import date
+
+from sqlalchemy import func,case
+
+from app.models import Tasks,Projects,Platforms,Taskstatus
+
 from app.schemas.tasks import TaskCreate
-from app.models.taskstatus import Taskstatus
-from app.models.platforms import Platforms
-from app.models.tasktype import Tasktype
-from app.database import SessionLocal
+
+from app.db.session import get_db
+from sqlalchemy.orm import Session
+
 from app.auth.dependencies import get_current_user
 from datetime import datetime
 from app.models.taskhistory import Taskhistory
 from app.util.formatters import calculate_working_minutes
 
+from typing import Optional
 import re
 
 router = APIRouter()
@@ -29,12 +34,29 @@ def format_minutes(minutes):
 
 @router.get("")
 def get_tasks(
+
+    search: str | None = None,
+    status: str | None = None,
+    project: int | None = None,
+    platform: int | None = None,
+    created_from: date | None = None,
+    created_to: date | None = None,
+    min_hours: int | None = None,
+    max_hours: int | None = None,
+
+    db:Session = Depends(get_db),
+
     current_user=Depends(get_current_user)
+
 ):
-    db = SessionLocal()
-    
+
     try:
+
         query = db.query(Tasks)
+
+        # ----------------------------------
+        # Existing user based filtering
+        # ----------------------------------
 
         if current_user.role != "admin":
 
@@ -42,87 +64,217 @@ def get_tasks(
                 Tasks.created_by ==
                 current_user.id
             )
+
+        # ----------------------------------
+        # Search filter
+        # ----------------------------------
+
+        if search:
+
+            query = query.filter(
+                Tasks.task_details.ilike(
+                    f"%{search}%"
+                )
+            )
+
+        # ----------------------------------
+        # Status filter
+        # ----------------------------------
+
+        if status:
+
+            query = query.join(
+                Tasks.task_status_id
+            ).filter(
+                Tasks.task_status_id.has(
+                    status_name=status
+                )
+            )
+
+        # ----------------------------------
+        # Project filter
+        # ----------------------------------
+
+        if project:
+
+            query = query.filter(
+                Tasks.project_id == project
+            )
             
+
+        # ----------------------------------
+        # Platform filter
+        # ----------------------------------
+
+        if platform:
+
+            query = query.filter(
+                Tasks.platform_id == platform
+            )
+
+        # ----------------------------------
+        # Created date range
+        # ----------------------------------
+
+        if created_from:
+
+            query = query.filter(
+                Tasks.created_date >= created_from
+            )
+
+
+        if created_to:
+
+            query = query.filter(
+                Tasks.created_date <= created_to
+            )
+
+        # ----------------------------------
+        # Hours filter
+        # ----------------------------------
+
+        if min_hours is not None:
+
+            query = query.filter(
+                Tasks.total_minutes >=
+                (min_hours * 60)
+            )
+
+        if max_hours is not None:
+
+            query = query.filter(
+                Tasks.total_minutes <=
+                (max_hours * 60)
+            )
+
+        # ----------------------------------
+        # IN_PROGRESS first
+        # then ID order
+        # ----------------------------------
+
+        query = query.order_by(
+
+            case(
+                (
+                    Tasks.task_status_id == 2,
+                    0
+                ),
+                else_=1
+            ),
+
+            Tasks.id.asc()
+
+        )
+
+
+
         tasks = query.all()
-        
+
+
+
         result = []
 
+
         for task in tasks:
+
             result.append({
+
                 "id": task.id,
+
 
                 "assigned_to":
                     task.assignee.username
                     if task.assignee else None,
 
+
                 "project":
                     task.projects.project_name
                     if task.projects else None,
+
 
                 "task_source":
                     task.tasksource.source_name
                     if task.tasksource else None,
 
+
                 "task_status":
                     task.taskstatus.status_name
                     if task.taskstatus else None,
+
 
                 "task_type":
                     task.tasktype.task_type_name
                     if task.tasktype else None,
 
+
                 "platform":
                     task.platform.platform_name
                     if task.platform else None,
 
-                "task_details": task.task_details,
-                "work_description": task.work_description,
-                "remarks": task.remarks,
-                "jira_logged": task.jira_logged,
-                "is_deleted": task.is_deleted,
+
+                "task_details":
+                    task.task_details,
+
+
+                "work_description":
+                    task.work_description,
+
+
+                "remarks":
+                    task.remarks,
+
+
+                "jira_logged":
+                    task.jira_logged,
+
+
+                "is_deleted":
+                    task.is_deleted,
+
 
                 "total_minutes":
-                    format_minutes(task.total_minutes),
+                    format_minutes(
+                        task.total_minutes
+                    ),
 
-                "created_date": task.created_date,
-                "started_date": task.started_date,
-                "completed_date": task.completed_date,
-                "created_at": task.created_at,
-                "updated_at": task.updated_at
+
+                "created_date":
+                    task.created_date,
+
+
+                "started_date":
+                    task.started_date,
+
+
+                "completed_date":
+                    task.completed_date,
+
+
+                "created_at":
+                    task.created_at,
+
+
+                "updated_at":
+                    task.updated_at
+
             })
+
 
         return result
 
+
     finally:
+
         db.close()
 
 @router.post("")
 async def createtask( 
     tasks: TaskCreate,
+    db:Session=Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    
-    db = SessionLocal()
 
     try:
-
-        # Get default NEW status
-        status = (
-            db.query(Taskstatus)
-            .filter(
-                Taskstatus.status_name == "NEW"
-            )
-            .first()
-        )
-
-
-        if not status:
-
-            raise HTTPException(
-                status_code=400,
-                detail="Default NEW status not found"
-            )
-
 
         # Create Task
         new_task = Tasks(
@@ -252,9 +404,10 @@ async def createtask(
 @router.patch("/{task_id}/status")
 def change_task_status(
     task_id: int,
+    db:Session=Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    db = SessionLocal()
+    
     
     try:
         # ---------------------------------
@@ -420,3 +573,8 @@ def change_task_status(
     finally:
 
         db.close()
+        
+@router.get("/filters/options")
+def filter_options():
+    print("test")
+    

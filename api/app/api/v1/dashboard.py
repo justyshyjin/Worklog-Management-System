@@ -3,7 +3,9 @@ from sqlalchemy import func
 from app.models.tasks import Tasks
 from app.models.taskstatus import Taskstatus
 # from app.models.task_type import TaskType
-from app.database import SessionLocal
+from app.db.session import get_db
+from sqlalchemy.orm import Session
+
 from app.auth.dependencies import get_current_user
 
 import re
@@ -28,9 +30,10 @@ def summary():
 
 @router.get("/stats")
 def get_stats(
+    db:Session=Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    db = SessionLocal()
+   
 
     try:
 

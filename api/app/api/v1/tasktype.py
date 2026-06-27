@@ -1,15 +1,18 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from sqlalchemy import func
 # from app.models.task import Task
 from app.models.tasktype import Tasktype
-from app.database import SessionLocal
+from app.db.session import get_db
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
 
 @router.get("")
-def get_tasktype():
-    db= SessionLocal()
+def get_tasktype(
+    db:Session=Depends(get_db)
+):
+    
     try:
         tasktype = (
             db.query(Tasktype)

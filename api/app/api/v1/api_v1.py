@@ -8,6 +8,8 @@ from app.api.v1.platforms import router as platforms_routes
 from app.api.v1.tasksource import router as tasksource_routes
 from app.api.v1.tasktype import router as tasktype_routes
 from app.api.v1.taskstatus import router as taskstatus_routes
+from app.api.v1.savedfilters import router as savedfilters_routes
+from app.api.v1.filters import router as filters_routes
 
 api_router = APIRouter()
 
@@ -19,3 +21,5 @@ api_router.include_router(platforms_routes, prefix="/platforms", tags=["Platform
 api_router.include_router(tasksource_routes, prefix="/tasksource", tags=["Tasksource"])
 api_router.include_router(tasktype_routes, prefix="/tasktype", tags=["Tasktype"])
 api_router.include_router(taskstatus_routes, prefix="/taskstatus", tags=["Taskstatus"])
+api_router.include_router(savedfilters_routes, prefix="/savedfilters", tags=["Savedfilters"])
+api_router.include_router(filters_routes, prefix="/filters", tags=["Filters"])

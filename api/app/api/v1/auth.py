@@ -1,6 +1,4 @@
-from fastapi import APIRouter
-from fastapi import Depends
-from fastapi import HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 
@@ -11,9 +9,13 @@ from app.auth.auth_service import (
 )
 
 from app.auth.dependencies import (
-    get_db,
     get_current_user
 )
+
+from app.db.session import (
+    get_db
+)
+
 
 router = APIRouter()
 
@@ -55,10 +57,8 @@ def me(
 
 @router.post("/logout")
 def logout():
-    
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    
+
     return {
-        "success": True
+        "success": True,
+        "message": "Logged out successfully"
     }
