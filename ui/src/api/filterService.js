@@ -14,8 +14,6 @@ const filterService = {
       }
     ),
 
-
-
   getSavedFilter: (id) =>
     axiosClient.get(
       `/savedfilters/${id}`

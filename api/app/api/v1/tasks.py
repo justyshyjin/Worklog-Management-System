@@ -1,25 +1,18 @@
-from fastapi import APIRouter,Depends,HTTPException,Query
-from datetime import date
-
-from sqlalchemy import func,case
-
+from fastapi import APIRouter,Depends,HTTPException,Query,Request
+from sqlalchemy import func,case,or_
 from app.models import Tasks,Projects,Platforms,Taskstatus
-
 from app.schemas.tasks import TaskCreate
-
+from app.core.permission import is_admin
 from app.db.session import get_db
 from sqlalchemy.orm import Session
-
 from app.auth.dependencies import get_current_user
-from datetime import datetime
+from datetime import date,datetime,timedelta
 from app.models.taskhistory import Taskhistory
 from app.util.formatters import calculate_working_minutes
-
-from typing import Optional
+from typing import List
 import re
 
 router = APIRouter()
-
 
 def normalize(name: str) -> str:
     return re.sub(r"\s+", "_", name.strip().lower())
@@ -33,17 +26,17 @@ def format_minutes(minutes):
     return f"{hours}h {mins}m"
 
 @router.get("")
-def get_tasks(
+def get_tasks(request: Request,
 
     search: str | None = None,
-    status: str | None = None,
-    project: int | None = None,
-    platform: int | None = None,
+    status: List[int] | None =  Query(None),
+    project: List[int] | None =  Query(None),
+    platform: List[int] | None =  Query(None),
     created_from: date | None = None,
     created_to: date | None = None,
     min_hours: int | None = None,
     max_hours: int | None = None,
-
+    range: str | None = None,
     db:Session = Depends(get_db),
 
     current_user=Depends(get_current_user)
@@ -58,7 +51,7 @@ def get_tasks(
         # Existing user based filtering
         # ----------------------------------
 
-        if current_user.role != "admin":
+        if not is_admin(current_user):
 
             query = query.filter(
                 Tasks.created_by ==
@@ -70,11 +63,13 @@ def get_tasks(
         # ----------------------------------
 
         if search:
-
+            search_pattern = f"%{search}%"
             query = query.filter(
-                Tasks.task_details.ilike(
-                    f"%{search}%"
-                )
+                or_(
+                Tasks.task_details.ilike(search_pattern),
+                Tasks.work_description.ilike(search_pattern),
+                Tasks.remarks.ilike(search_pattern)
+            )
             )
 
         # ----------------------------------
@@ -83,12 +78,8 @@ def get_tasks(
 
         if status:
 
-            query = query.join(
-                Tasks.task_status_id
-            ).filter(
-                Tasks.task_status_id.has(
-                    status_name=status
-                )
+            query = query.filter(
+                Tasks.task_status_id.in_(status)
             )
 
         # ----------------------------------
@@ -98,7 +89,7 @@ def get_tasks(
         if project:
 
             query = query.filter(
-                Tasks.project_id == project
+                Tasks.project_id.in_(project)
             )
             
 
@@ -109,7 +100,7 @@ def get_tasks(
         if platform:
 
             query = query.filter(
-                Tasks.platform_id == platform
+                Tasks.platform_id.in_(platform)
             )
 
         # ----------------------------------
@@ -146,7 +137,42 @@ def get_tasks(
                 Tasks.total_minutes <=
                 (max_hours * 60)
             )
+        # ----------------------------------
+        # Quick Report
+        # ----------------------------------
+        
+        if range == "today":
+            now = date.today()
 
+            query = query.filter(
+                Tasks.created_date >= datetime.combine(now, datetime.min.time()),
+                Tasks.created_date < datetime.combine(now + timedelta(days=1), datetime.min.time())
+            )
+
+        elif range == "week":
+            today_date = date.today()
+            start_of_week = today_date - timedelta(days=today_date.weekday())
+            end_of_week = start_of_week + timedelta(days=7)
+
+            query = query.filter(
+                Tasks.created_date >= datetime.combine(start_of_week, datetime.min.time()),
+                Tasks.created_date < datetime.combine(end_of_week, datetime.min.time())
+            )
+
+        elif range == "month":
+            today_date = date.today()
+
+            start_of_month = today_date.replace(day=1)
+
+            if today_date.month == 12:
+                next_month = today_date.replace(year=today_date.year + 1, month=1, day=1)
+            else:
+                next_month = today_date.replace(month=today_date.month + 1, day=1)
+
+            query = query.filter(
+                Tasks.created_date >= datetime.combine(start_of_month, datetime.min.time()),
+                Tasks.created_date < datetime.combine(next_month, datetime.min.time())
+            )
         # ----------------------------------
         # IN_PROGRESS first
         # then ID order
@@ -347,7 +373,7 @@ async def createtask(
 
 
             new_status_id=
-                status.id,
+                1,
 
 
             old_assigned_to=
@@ -574,7 +600,5 @@ def change_task_status(
 
         db.close()
         
-@router.get("/filters/options")
-def filter_options():
-    print("test")
+
     

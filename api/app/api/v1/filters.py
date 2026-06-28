@@ -1,30 +1,31 @@
-from fastapi import APIRouter, Depends, Query
+from typing import List
+
+from fastapi import Query, Depends,APIRouter
 from sqlalchemy.orm import Session
 
+from app.core.permission import is_admin
 from app.db.session import get_db
 from app.auth.dependencies import get_current_user
 
-from app.models import Tasks, Projects, Taskstatus, Platforms
+from app.models import Tasks, Projects, Taskstatus, Platforms, ProjectPlatform
 
 router = APIRouter()
 
 @router.get("/options")
 def get_filter_options(
     module: str = Query(...),
+    project_id: List[int] | None = Query(None),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
     options = {}
 
-
-
     if module == "tasks":
 
-
-
         # ----------------------------
-        # Task Status options
+        # Status options
+        # Common for everyone
         # ----------------------------
 
         statuses = (
@@ -51,29 +52,21 @@ def get_filter_options(
 
 
         # ----------------------------
-        # Project options
+        # Projects
+        # User based
         # ----------------------------
 
-        if current_user.role == "admin":
+        if is_admin(current_user):
 
-            projects = (
-                db.query(Projects)
-                .all()
-            )
+            projects = db.query(Projects).all()
 
         else:
 
             projects = (
                 db.query(Projects)
-                .join(Tasks)
-                .filter(
-                    Tasks.created_by ==
-                    current_user.id
-                )
-                .distinct()
+                .filter(Projects.created_by == current_user.id)
                 .all()
             )
-
 
         options["projects"] = [
 
@@ -89,28 +82,76 @@ def get_filter_options(
 
 
         # ----------------------------
-        # Platform options
+        # Platforms
+        # Depends on project
         # ----------------------------
 
-        if current_user.role == "admin":
+        if project_id:
+
+            # Selected project(s)
+            # project_id can be single or multiple
+
+            if not isinstance(project_id, list):
+                project_ids = [project_id]
+            else:
+                project_ids = project_id
+
 
             platforms = (
                 db.query(Platforms)
+
+                .join(
+                    ProjectPlatform,
+                    ProjectPlatform.platform_id == Platforms.id
+                )
+
+                .filter(
+                    ProjectPlatform.project_id.in_(project_ids)
+                )
+
+                .distinct()
+
                 .all()
             )
+
 
         else:
 
-            platforms = (
-                db.query(Platforms)
-                .join(Tasks)
-                .filter(
-                    Tasks.created_by ==
-                    current_user.id
+            # No project selected
+
+            if is_admin(current_user):
+
+                platforms = (
+                    db.query(Platforms)
+                    .all()
                 )
-                .distinct()
-                .all()
-            )
+
+
+            else:
+
+                # Platforms from current user's projects
+
+                platforms = (
+                    db.query(Platforms)
+
+                    .join(
+                        ProjectPlatform,
+                        ProjectPlatform.platform_id == Platforms.id
+                    )
+
+                    .join(
+                        Projects,
+                        Projects.id == ProjectPlatform.project_id
+                    )
+
+                    .filter(
+                        Projects.created_by == current_user.id
+                    )
+
+                    .distinct()
+
+                    .all()
+                )
 
 
         options["platforms"] = [

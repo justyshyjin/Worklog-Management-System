@@ -4,13 +4,18 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import SnackbarAlert from "../common/SnackbarAlert";
 import TaskActions from "./TaskActions";
+
 import QuickReports from "../filters/QuickReports";
 import SavedFilters from "../filters/SavedFilters";
 import FilterPanel from "../filters/FilterPanel";
-import { filterConfigs } from "../../utils/filterConfig";
+
+import { taskFilterFields, taskDefaultFilters } from "../../utils/filters";
 import { dateTimeColumn } from "../../utils/formatter";
+
 import ExportToolbar from "../export/ExportToolbar";
+
 import taskService from "../../api/taskService";
+
 import TaskTimer from "../common/TaskTimer";
 import ViewTask from "../modals/ViewTask";
 import "../../styles/TaskGrid.css";
@@ -20,165 +25,183 @@ const TaskGrid = () => {
 
   const gridRef = useRef();
 
-  const [selectedRows, setSelectedRows] =
-    useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
 
-  const defaultFilters = {
-    search: "",
-    status: "",
-    project: "",
-    platform: "",
-    created_from: "",
-    created_to: "",
-    min_hours: "",
-    max_hours: ""
+  const [filters, setFilters] = useState(taskDefaultFilters);
+
+  const [activeReport, setActiveReport] = useState(null);
+
+  const resetFilters = () => {
+    setFilters(taskDefaultFilters);
+
+    // reload default platform list
+    loadFilterOptions();
   };
-  const [filters, setFilters] =
-    useState(defaultFilters);
 
+  const [filterOptions, setFilterOptions] = useState({
+    statuses: [],
+    projects: [],
+    platforms: []
+  });
 
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [filterOptions, setFilterOptions] =
-    useState({
-      statuses: [],
-      projects: [],
-      platforms: []
-    });
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: ""
+  });
 
-  const [tasks, setTasks] =
-    useState([]);
+  const [viewOpen, setViewOpen] = useState(false);
 
-  const [alert, setAlert] =
-    useState({
-      open: false,
-      message: "",
-      severity: ""
-    });
+  const [selectedTask, setSelectedTask] = useState(null);
 
-  const [loading, setLoading] =
-    useState(false);
-
-  const [viewOpen, setViewOpen] =
-    useState(false);
-
-  const [selectedTask, setSelectedTask] =
-    useState(null);
   /*
       Load dynamic filter values
       Status / Project / Platform
+
+      Initial load:
+      - status
+      - projects
+      - platforms related to user's projects
   */
-  const loadFilterOptions = useCallback(
-    async () => {
+
+  const loadFilterOptions = useCallback(async () => {
+
+    try {
+
+      const response =
+        await taskService.getFilterOptions("tasks");
+
+      setFilterOptions({
+        statuses: response.data?.statuses || [],
+        projects: response.data?.projects || [],
+        platforms: response.data?.platforms || []
+      });
+
+    } catch (error) {
+      console.error("Filter option loading failed", error);
+    }
+  }, []);
+
+  /*
+      Load platforms based on selected project
+  */
+
+  const loadProjectPlatforms = useCallback(
+    async (projectId) => {
+
       try {
+
         const response =
-          await taskService.getFilterOptions();
+          await taskService.getFilterOptions(
+            "tasks",
+            {
+              project_id: projectId
+            }
+          );
 
-        setFilterOptions(
-          response.data
-        );
+        setFilterOptions(prev => ({
 
-      }
-      catch (error) {
+          ...prev,
+
+          platforms:
+            response.data?.platforms || []
+
+        }));
+
+
+      } catch (error) {
+
         console.error(
-          "Filter option loading failed",
+          "Project platform loading failed",
           error
         );
+
       }
 
     },
     []
   );
+
   /*
       Fetch tasks using filters
   */
-  const fetchTasks = useCallback(
-    async (filters = {}) => {
 
-      try {
+  const fetchTasks = useCallback(async (filters = {}) => {
 
-        setLoading(true);
+    try {
 
-        const response =
-          await taskService.getTasks(
-            filters
-          );
+      setLoading(true);
 
-        setTasks(
-          response.data
-        );
 
-      }
-      catch (error) {
+      const response =
+        await taskService.getTasks(filters);
 
-        console.error(
-          error
-        );
 
-      }
-      finally {
+      setTasks(response.data);
 
-        setLoading(false);
 
-      }
+    } catch (error) {
 
-    },
-    []
-  );
+      console.error(error);
+
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  }, []);
+
   /*
       Initial load
       Filter change reload
   */
+
   useEffect(() => {
 
-    fetchTasks(
-      filters
-    );
+    fetchTasks(filters);
+  }, [filters, fetchTasks]);
 
-  }, [
-    filters,
-    fetchTasks
-  ]);
   /*
       Load filter dropdown values once
   */
   useEffect(() => {
+    loadFilterOptions();
+  }, [loadFilterOptions]);
 
-
+  /*
+      Task created / updated events
+  */
+  useEffect(() => {
 
     const refreshTasks = () => {
-
-      fetchTasks();
-
+      fetchTasks(filters);
     };
 
-
-    window.addEventListener(
-      "task-created",
-      refreshTasks
-    );
-
+    window.addEventListener("task-created", refreshTasks);
+    window.addEventListener("task-changed", refreshTasks);
+    window.addEventListener("taskstatus-changed", refreshTasks);
 
     return () => {
-
-      window.removeEventListener(
-        "task-created",
-        refreshTasks
-      );
-
+      window.removeEventListener("task-created", refreshTasks);
+      window.removeEventListener("task-changed", refreshTasks);
+      window.removeEventListener("taskstatus-changed", refreshTasks);
     };
 
+  }, [fetchTasks, filters]);
 
-  }, [
-    fetchTasks
-  ]);
-
+  /*
+      Status change
+  */
   const handleStatusChange = async (row) => {
     try {
 
       const response =
-        await taskService.changeStatus(
-          row.id
-        );
+        await taskService.changeStatus(row.id);
 
       await fetchTasks(filters);
 
@@ -188,96 +211,88 @@ const TaskGrid = () => {
 
       setAlert({
         open: true,
-        message:
-          response.data.message,
-        severity:
-          "success",
+        message: response.data.message,
+        severity: "success",
         duration: 3000,
-
         onClose: () => {
-          setAlert(prev => ({
-            ...prev,
-            open: false
-          }));
+          setAlert(prev => ({ ...prev, open: false }));
         }
-
       });
 
-    }
-    catch (error) {
+    } catch (error) {
 
-      handleStatusBlocked(
-        error.response.data.detail
-      );
+      handleStatusBlocked(error.response?.data?.detail);
 
-      console.error(
-        "Status change failed",
-        error
-      );
+      console.error("Status change failed", error);
 
     }
 
   };
-  const handleStatusBlocked = (
-    message
-  ) => {
+
+  const handleStatusBlocked = (message) => {
 
     setAlert({
       open: true,
       message,
       severity: "warning",
       duration: 3000,
-
       onClose: () => {
-        setAlert(prev => ({
-          ...prev,
-          open: false
-        }));
+        setAlert(prev => ({ ...prev, open: false }));
       }
-
     });
 
   };
 
+  /*
+      Filter change
+  */
+  const handleFilterChange = (key, value) => {
+
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+
+    if (key === "project") {
+      loadProjectPlatforms(value); // optional reload
+    }
+  };
+
+  /*
+      View task
+  */
   const handleView = (params) => {
 
-    setSelectedTask(
-      params.data
-    );
-
+    setSelectedTask(params.data);
     setViewOpen(true);
 
   };
+
+  /*
+      Edit task
+  */
   const handleEdit = (row) => {
-
-    console.log(
-      "Edit",
-      row
-    );
-
+    console.log("Edit", row);
   };
+
+  /*
+      Delete task
+  */
   const handleDelete = async (row) => {
 
     try {
 
-      await taskService.deleteTask(
-        row.id
-      );
+      await taskService.deleteTask(row.id);
 
       setViewOpen(false);
 
       await fetchTasks(filters);
 
+    } catch (error) {
+      console.error(error);
     }
-    catch (error) {
-
-      console.error(
-        error
-      );
-
-    }
-
   };
+
 
   const columns = [
 
@@ -414,54 +429,44 @@ const TaskGrid = () => {
     }
 
   ];
+
   return (
     <div className="task-grid-container">
 
       <div className="task_filters">
 
-        {/* <QuickReports
-          onSelect={(data) =>
-            setFilters(prev => ({
-              ...prev,
-              ...data
-            }))
-          }
-        /> */}
+        <QuickReports
+          activeReport={activeReport}
+          setActiveReport={setActiveReport}
+          onSelect={(reportFilters) => {
+            setFilters(prev => {
+              const updated = {
+                ...prev,
+                ...reportFilters
+              };
+              if (!reportFilters.range) {
+                delete updated.range;
+              }
+              return updated;
+            });
+          }}
+        />
 
-        <SavedFilters
+        {/* <SavedFilters
           module="tasks"
           onSelect={(saved) =>
             setFilters(
               saved.filter_json
             )
           }
-        />
+        /> */}
         <FilterPanel
-
-          filters={
-            filters
-          }
-
-          setFilters={
-            setFilters
-          }
-
-          fields={
-            filterConfigs.tasks
-          }
-
-          options={
-            filterOptions
-          }
-
-          onReset={() => {
-
-            setFilters(
-              defaultFilters
-            );
-
-          }}
-
+          filters={filters}
+          setFilters={setFilters}
+          fields={taskFilterFields}
+          options={filterOptions}
+          onFilterChange={handleFilterChange}
+          onReset={resetFilters}
         />
 
       </div>

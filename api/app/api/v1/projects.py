@@ -11,7 +11,7 @@ router = APIRouter()
 @router.get("")
 def get_projects(db:Session = Depends(get_db),):
     try:
-
+        
         projects = (
             db.query(Projects)
             .all()

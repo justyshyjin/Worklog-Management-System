@@ -45,20 +45,20 @@ const SavedFilters = ({
       setLoading(true);
 
 
-    const response =
+      const response =
         await filterService.getSavedFilters(
           module
         );
 
 
 
-    setFilters(
+      setFilters(
         response.data.items || []
       );
 
 
     }
-    catch(error) {
+    catch (error) {
 
 
       console.error(
@@ -110,23 +110,23 @@ const SavedFilters = ({
 
           <>
 
-      {
-        filters.map(
+            {
+              filters.map(
                 (filter) => (
 
-            <Button
+                  <Button
 
                     key={
                       filter.id
                     }
 
 
-              variant="outlined"
-              onClick={() =>
-                onSelect(
-                  filter
-                )
-              }
+                    variant="outlined"
+                    onClick={() =>
+                      onSelect(
+                        filter
+                      )
+                    }
 
 
                   >
@@ -136,11 +136,11 @@ const SavedFilters = ({
                     }
 
 
-            </Button>
+                  </Button>
 
                 )
 
-          )
+              )
             }
 
           </>

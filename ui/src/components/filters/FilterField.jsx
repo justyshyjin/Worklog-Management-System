@@ -10,155 +10,106 @@ const FilterField = ({
     onChange
 }) => {
 
+    const normalizedValue = field.multiple
+        ? (Array.isArray(value) ? value : [])
+        : (value ?? "");
 
-
-    if(field.type === "text") {
-
+    // TEXT FIELD
+    if (field.type === "text") {
 
         return (
-
             <TextField
-
-                key={
-                    field.name
-                }
-
 
                 size="small"
 
+                label={field.label}
 
-                label={
-                    field.label
-                }
+                value={value ?? ""}
 
-
-                value={
-                    value
-                }
-
-
-                onChange={(e)=>
-
+                onChange={(e) =>
                     onChange(
-                        field.name,
+                        field.key,
                         e.target.value
                     )
-
                 }
 
             />
-
         );
-
-
     }
 
 
-
-
-
-    if(field.type === "select") {
+    // SELECT FIELD
+    if (field.type === "select") {
 
 
         const values =
-            options?.[
-                field.optionsKey
-            ] || [];
-
+            options?.[field.optionsKey] || [];
 
 
         return (
-
             <Select
-
-
-                key={
-                    field.name
-                }
-
-
                 size="small"
-
-
-                value={
-                    value
-                }
-
-
+                multiple={field.multiple}
+                value={normalizedValue ?? ""}
                 displayEmpty
+                renderValue={(selected) => {
 
+                    if (field.multiple && selected.length === 0) {
+                        return `All ${field.label}`;
+                    }
 
+                    if (field.multiple) {
+                        return selected
+                            .map(id => {
+                                const item = values.find(
+                                    option => option.id === id
+                                );
 
-                onChange={(e)=>
+                                return item?.name;
+                            })
+                            .join(", ");
+                    }
+
+                    return selected;
+                }}
+
+                onChange={(e) => {
+
+                    let newValue = e.target.value;
+
+                    if (
+                        newValue.includes("__all__")
+                    ) {
+                        newValue = [];
+                    }
 
                     onChange(
-                        field.name,
-                        e.target.value
-                    )
+                        field.key,
+                        newValue
+                    );
 
-                }
-
-
+                }}
             >
-
-
-                <MenuItem value="">
-
-                    All {field.label}
-
-                </MenuItem>
-
-
-
-
                 {
-                    values.map(
-                        (option)=>(
-
-
-                            <MenuItem
-
-                                key={
-                                    option.id ??
-                                    option
-                                }
-
-
-                                value={
-                                    option.id ??
-                                    option
-                                }
-
-
-                            >
-
-                                {
-                                    option.name ??
-                                    option
-                                }
-
-
-                            </MenuItem>
-
-
-                        )
+                    field.multiple && (
+                        <MenuItem value="__all__" >
+                            All {field.label}
+                        </MenuItem>
                     )
                 }
-
-
-
+                {
+                    values.map((option) => (
+                        <MenuItem key={option.id} value={option.id} >
+                            {option.name}
+                        </MenuItem>
+                    ))
+                }
             </Select>
-
         );
-
-
     }
 
 
-
-
     return null;
-
 
 };
 

@@ -2,30 +2,21 @@ import axiosClient from "./axiosClient";
 
 const taskService = {
 
-  getTasks:(params={}) => {
-
+  getTasks: (params = {}) => {
     const cleanParams =
-        Object.fromEntries(
-            Object.entries(params)
-            .filter(
-                ([key,value]) =>
-                    value !== ""
-                    &&
-                    value !== null
-                    &&
-                    value !== undefined
-            )
-        );
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([key, value]) =>
+            value !== "" &&
+            value !== null &&
+            value !== undefined
+          )
+      );
 
-
-    return axiosClient.get(
-        "/tasks",
-        {
-            params: cleanParams
-        }
-    );
-
-},
+    return axiosClient.get("/tasks", {
+      params: cleanParams
+    });
+  },
 
   getTaskById: (id) =>
     axiosClient.get(
@@ -63,20 +54,22 @@ const taskService = {
     axiosClient.get(
       "/tasks/stats"
     ),
-  getFilterOptions: () =>
-    axiosClient.get(
-      "/tasks/filteroptions"
-    ),
+  getFilterOptions: (
+    module,
+    params = {}
+  ) => {
 
-  getFilterOptions: (module) =>
-    axiosClient.get(
+    return axiosClient.get(
       "/filters/options",
       {
         params: {
-          module
+          module,
+          ...params
         }
       }
-    )
+    );
+
+  }
 
 
 };

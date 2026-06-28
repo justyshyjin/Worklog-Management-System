@@ -1,7 +1,13 @@
 import axios from "axios";
+import qs from "qs";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8000/api/v1",
+  paramsSerializer: (params) =>
+    qs.stringify(params, {
+      arrayFormat: "repeat", // 🔥 key fix
+      skipNulls: true
+    }),
   timeout: 30000,
   headers: {
     "Content-Type": "application/json"

@@ -1,0 +1,109 @@
+.task-filter-panel {
+
+    background: #081522;
+
+    border: 1px solid rgba(0,255,136,0.25);
+
+    border-radius: 12px;
+
+    padding: 16px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.filter-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+}
+
+
+
+.task-filter-panel input,
+.task-filter-panel select {
+
+    background: #0d1b2a;
+
+    color: #00ff88;
+
+    border: 1px solid rgba(0,255,136,0.35);
+
+    border-radius: 6px;
+
+    height: 38px;
+
+    padding: 0 12px;
+
+}
+
+
+
+.task-filter-panel input::placeholder {
+
+    color: #8aa0b5;
+
+}
+
+
+
+/* dropdown text */
+
+.task-filter-panel option {
+
+    background: #081522;
+
+    color: #00ff88;
+
+}
+.task-filter-panel .MuiOutlinedInput-root{
+    color:#d7f7ff;
+}
+
+.quick-reports {
+  padding: 12px;
+}
+
+.report-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* base button */
+.report-tab {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #2dd4bf;
+  background: transparent;
+  color: #a7f3d0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+/* hover effect */
+.report-tab:hover {
+  background: rgba(73, 248, 225, 0.24);
+  transform: translateY(-1px);
+}
+
+/* active state */
+.report-tab.active {
+  background: linear-gradient(
+  45deg,  
+  #063a33,
+    #078a2e
+  );
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.4);
+}

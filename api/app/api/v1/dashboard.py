@@ -5,6 +5,8 @@ from app.models.taskstatus import Taskstatus
 # from app.models.task_type import TaskType
 from app.db.session import get_db
 from sqlalchemy.orm import Session
+from app.core.permission import is_admin
+
 
 from app.auth.dependencies import get_current_user
 
@@ -41,7 +43,7 @@ def get_stats(
         task_query = db.query(Tasks)
 
         # Normal user can see only own tasks
-        if current_user.role.lower() != "admin":
+        if not is_admin(current_user):
 
             task_query = task_query.filter(
                 Tasks.created_by ==

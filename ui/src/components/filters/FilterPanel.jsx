@@ -2,97 +2,65 @@ import Button from "@mui/material/Button";
 
 import FilterField from "./FilterField";
 
+import "../../styles/filter.css";
+
 
 const FilterPanel = ({
     filters,
     setFilters,
     fields,
     options,
-    onReset
+    onReset,
+    onFilterChange
 }) => {
 
 
 
-    const handleChange = (
-        key,
-        value
-    ) => {
+    const handleChange = (key, value) => {
 
+        if (onFilterChange) {
+            onFilterChange(key, value);
+            return;
+        }
 
-        setFilters({
-
-            ...filters,
-
+        setFilters((prev) => ({
+            ...prev,
             [key]: value
-
-        });
-
-
+        }));
     };
-
-
 
 
     return (
 
-        <div className="common-filter-panel">
+        <div className="task-filter-panel">
 
+            <div className="filter-left">
+                {Array.isArray(fields) &&
+                    fields.map((field, index) => (
+                        <FilterField
+                            key={`${field.key}-${index}`}
+                            field={field}
+                            value={filters?.[field.key] || ""}
+                            options={options}   // 🔥 MUST BE FULL OBJECT
+                            onChange={handleChange}
+                        />
+                    ))}
 
-            {
-                Array.isArray(fields) &&
-                fields.map((field) => (
+                <Button
 
-                    <FilterField
+                    variant="outlined"
 
-                        key={
-                            field.name
-                        }
+                    onClick={
+                        onReset
+                    }
 
+                >
 
-                        field={
-                            field
-                        }
+                    Reset
 
+                </Button>
 
-                        value={
-                            filters?.[field.name] || ""
-                        }
-
-
-                        options={
-                            options
-                        }
-
-
-                        onChange={
-                            handleChange
-                        }
-
-                    />
-
-                )
-                )
-            }
-
-
-
-
-
-            <Button
-
-                variant="outlined"
-
-                onClick={
-                    onReset
-                }
-
-            >
-
-                Reset
-
-            </Button>
-
-
+            </div>
 
         </div>
 
