@@ -1,7 +1,13 @@
 import axios from "axios";
+import qs from "qs";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8000/api/v1",
+  paramsSerializer: (params) =>
+    qs.stringify(params, {
+      arrayFormat: "repeat", // 🔥 key fix
+      skipNulls: true
+    }),
   timeout: 30000,
   headers: {
     "Content-Type": "application/json"
@@ -26,7 +32,9 @@ axiosClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("access_token");
-      window.location.href = "/";
+      localStorage.removeItem("user");
+
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);

@@ -422,4 +422,24 @@ CREATE TABLE saved_filters (
         REFERENCES users(id)
 );
 
+--Table  to store saved filter settings
+
+CREATE TABLE saved_filters (
+
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    module VARCHAR(50) NOT NULL,
+
+    name VARCHAR(100) NOT NULL,
+
+    filter_json JSON NOT NULL,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+
+);
 

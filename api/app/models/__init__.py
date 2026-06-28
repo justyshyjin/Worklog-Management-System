@@ -6,3 +6,5 @@ from .taskstatus import Taskstatus
 from .tasktype import Tasktype
 from .platforms import Platforms
 from .taskhistory import Taskhistory
+from .savedfilters import SavedFilters
+from .projectplatform import ProjectPlatform

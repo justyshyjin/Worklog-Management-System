@@ -1,16 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from sqlalchemy import func
 from app.models.projects import Projects
-from app.database import SessionLocal
+from app.db.session import get_db
+from sqlalchemy.orm import Session
+
 
 router = APIRouter()
 
 
 @router.get("")
-def get_projects():
-    db= SessionLocal()
+def get_projects(db:Session = Depends(get_db),):
     try:
-
+        
         projects = (
             db.query(Projects)
             .all()

@@ -2,11 +2,21 @@ import axiosClient from "./axiosClient";
 
 const taskService = {
 
-  getTasks: (params = {}) =>
-    axiosClient.get(
-      "/tasks",
-      { params }
-    ),
+  getTasks: (params = {}) => {
+    const cleanParams =
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([key, value]) =>
+            value !== "" &&
+            value !== null &&
+            value !== undefined
+          )
+      );
+
+    return axiosClient.get("/tasks", {
+      params: cleanParams
+    });
+  },
 
   getTaskById: (id) =>
     axiosClient.get(
@@ -34,20 +44,33 @@ const taskService = {
     ),
 
   changeStatus: (
-    id,
-    task_status_id
+    id
   ) =>
     axiosClient.patch(
-      `/tasks/${id}/status`,
-      {
-        task_status_id
-      }
+      `/tasks/${id}/status`
     ),
 
   getTaskStats: () =>
     axiosClient.get(
       "/tasks/stats"
-    )
+    ),
+  getFilterOptions: (
+    module,
+    params = {}
+  ) => {
+
+    return axiosClient.get(
+      "/filters/options",
+      {
+        params: {
+          module,
+          ...params
+        }
+      }
+    );
+
+  }
+
 
 };
 

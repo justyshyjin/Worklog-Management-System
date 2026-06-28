@@ -1,14 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from sqlalchemy import func
 from app.models.platforms import Platforms
-from app.database import SessionLocal
+from app.db.session import get_db
+from sqlalchemy.orm import Session
 
 
 router = APIRouter()
 
 @router.get("")
-def get_platforms():
-    db= SessionLocal()
+def get_platforms(
+    db:Session=Depends(get_db)
+):
+    
     try:
 
         platforms = (

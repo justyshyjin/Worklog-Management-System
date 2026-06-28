@@ -1,19 +1,18 @@
-from fastapi import APIRouter,Depends
-from sqlalchemy import func
-from app.models.tasks import Tasks
+from fastapi import APIRouter,Depends,HTTPException,Query,Request
+from sqlalchemy import func,case,or_
+from app.models import Tasks,Projects,Platforms,Taskstatus
 from app.schemas.tasks import TaskCreate
-from app.models.taskstatus import Taskstatus
-from app.models.platforms import Platforms
-from app.models.tasktype import Tasktype
-from app.database import SessionLocal
+from app.core.permission import is_admin
+from app.db.session import get_db
+from sqlalchemy.orm import Session
 from app.auth.dependencies import get_current_user
-from datetime import datetime
+from datetime import date,datetime,timedelta
 from app.models.taskhistory import Taskhistory
-
+from app.util.formatters import calculate_working_minutes
+from typing import List
 import re
 
 router = APIRouter()
-
 
 def normalize(name: str) -> str:
     return re.sub(r"\s+", "_", name.strip().lower())
@@ -27,101 +26,281 @@ def format_minutes(minutes):
     return f"{hours}h {mins}m"
 
 @router.get("")
-def get_tasks(
+def get_tasks(request: Request,
+
+    search: str | None = None,
+    status: List[int] | None =  Query(None),
+    project: List[int] | None =  Query(None),
+    platform: List[int] | None =  Query(None),
+    created_from: date | None = None,
+    created_to: date | None = None,
+    min_hours: int | None = None,
+    max_hours: int | None = None,
+    range: str | None = None,
+    db:Session = Depends(get_db),
+
     current_user=Depends(get_current_user)
+
 ):
-    db = SessionLocal()
-    
+
     try:
+
         query = db.query(Tasks)
 
-        if current_user.role != "admin":
+        # ----------------------------------
+        # Existing user based filtering
+        # ----------------------------------
+
+        if not is_admin(current_user):
 
             query = query.filter(
                 Tasks.created_by ==
                 current_user.id
             )
+
+        # ----------------------------------
+        # Search filter
+        # ----------------------------------
+
+        if search:
+            search_pattern = f"%{search}%"
+            query = query.filter(
+                or_(
+                Tasks.task_details.ilike(search_pattern),
+                Tasks.work_description.ilike(search_pattern),
+                Tasks.remarks.ilike(search_pattern)
+            )
+            )
+
+        # ----------------------------------
+        # Status filter
+        # ----------------------------------
+
+        if status:
+
+            query = query.filter(
+                Tasks.task_status_id.in_(status)
+            )
+
+        # ----------------------------------
+        # Project filter
+        # ----------------------------------
+
+        if project:
+
+            query = query.filter(
+                Tasks.project_id.in_(project)
+            )
             
+
+        # ----------------------------------
+        # Platform filter
+        # ----------------------------------
+
+        if platform:
+
+            query = query.filter(
+                Tasks.platform_id.in_(platform)
+            )
+
+        # ----------------------------------
+        # Created date range
+        # ----------------------------------
+
+        if created_from:
+
+            query = query.filter(
+                Tasks.created_date >= created_from
+            )
+
+
+        if created_to:
+
+            query = query.filter(
+                Tasks.created_date <= created_to
+            )
+
+        # ----------------------------------
+        # Hours filter
+        # ----------------------------------
+
+        if min_hours is not None:
+
+            query = query.filter(
+                Tasks.total_minutes >=
+                (min_hours * 60)
+            )
+
+        if max_hours is not None:
+
+            query = query.filter(
+                Tasks.total_minutes <=
+                (max_hours * 60)
+            )
+        # ----------------------------------
+        # Quick Report
+        # ----------------------------------
+        
+        if range == "today":
+            now = date.today()
+
+            query = query.filter(
+                Tasks.created_date >= datetime.combine(now, datetime.min.time()),
+                Tasks.created_date < datetime.combine(now + timedelta(days=1), datetime.min.time())
+            )
+
+        elif range == "week":
+            today_date = date.today()
+            start_of_week = today_date - timedelta(days=today_date.weekday())
+            end_of_week = start_of_week + timedelta(days=7)
+
+            query = query.filter(
+                Tasks.created_date >= datetime.combine(start_of_week, datetime.min.time()),
+                Tasks.created_date < datetime.combine(end_of_week, datetime.min.time())
+            )
+
+        elif range == "month":
+            today_date = date.today()
+
+            start_of_month = today_date.replace(day=1)
+
+            if today_date.month == 12:
+                next_month = today_date.replace(year=today_date.year + 1, month=1, day=1)
+            else:
+                next_month = today_date.replace(month=today_date.month + 1, day=1)
+
+            query = query.filter(
+                Tasks.created_date >= datetime.combine(start_of_month, datetime.min.time()),
+                Tasks.created_date < datetime.combine(next_month, datetime.min.time())
+            )
+        # ----------------------------------
+        # IN_PROGRESS first
+        # then ID order
+        # ----------------------------------
+
+        query = query.order_by(
+
+            case(
+                (
+                    Tasks.task_status_id == 2,
+                    0
+                ),
+                else_=1
+            ),
+
+            Tasks.id.asc()
+
+        )
+
+
+
         tasks = query.all()
+
+
 
         result = []
 
+
         for task in tasks:
+
             result.append({
+
                 "id": task.id,
+
 
                 "assigned_to":
                     task.assignee.username
                     if task.assignee else None,
 
+
                 "project":
                     task.projects.project_name
                     if task.projects else None,
+
 
                 "task_source":
                     task.tasksource.source_name
                     if task.tasksource else None,
 
+
                 "task_status":
                     task.taskstatus.status_name
                     if task.taskstatus else None,
+
 
                 "task_type":
                     task.tasktype.task_type_name
                     if task.tasktype else None,
 
+
                 "platform":
                     task.platform.platform_name
                     if task.platform else None,
 
-                "task_details": task.task_details,
-                "work_description": task.work_description,
-                "remarks": task.remarks,
-                "jira_logged": task.jira_logged,
-                "is_deleted": task.is_deleted,
+
+                "task_details":
+                    task.task_details,
+
+
+                "work_description":
+                    task.work_description,
+
+
+                "remarks":
+                    task.remarks,
+
+
+                "jira_logged":
+                    task.jira_logged,
+
+
+                "is_deleted":
+                    task.is_deleted,
+
 
                 "total_minutes":
-                    format_minutes(task.total_minutes),
+                    format_minutes(
+                        task.total_minutes
+                    ),
 
-                "created_date": task.created_date,
-                "started_date": task.started_date,
-                "completed_date": task.completed_date,
-                "created_at": task.created_at,
-                "updated_at": task.updated_at
+
+                "created_date":
+                    task.created_date,
+
+
+                "started_date":
+                    task.started_date,
+
+
+                "completed_date":
+                    task.completed_date,
+
+
+                "created_at":
+                    task.created_at,
+
+
+                "updated_at":
+                    task.updated_at
+
             })
+
 
         return result
 
+
     finally:
+
         db.close()
 
 @router.post("")
 async def createtask( 
     tasks: TaskCreate,
+    db:Session=Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    
-    db = SessionLocal()
 
     try:
-
-        # Get default NEW status
-        status = (
-            db.query(Taskstatus)
-            .filter(
-                Taskstatus.status_name == "NEW"
-            )
-            .first()
-        )
-
-
-        if not status:
-
-            raise HTTPException(
-                status_code=400,
-                detail="Default NEW status not found"
-            )
-
 
         # Create Task
         new_task = Tasks(
@@ -194,7 +373,7 @@ async def createtask(
 
 
             new_status_id=
-                status.id,
+                1,
 
 
             old_assigned_to=
@@ -247,3 +426,179 @@ async def createtask(
     finally:
 
         db.close()
+        
+@router.patch("/{task_id}/status")
+def change_task_status(
+    task_id: int,
+    db:Session=Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    
+    
+    try:
+        # ---------------------------------
+        # Get Task
+        # ---------------------------------
+        task = (
+            db.query(Tasks).filter(
+                Tasks.id==task_id
+            ).first()
+            )
+        if not task:
+
+            raise HTTPException(
+                status_code=404,
+                detail=f"Task not found"
+            )
+        
+        # ---------------------------------
+        # Current Status
+        # ---------------------------------
+        
+        old_status = task.task_status_id
+            
+        if not old_status:
+
+            raise HTTPException(
+                status_code=400,
+                detail=f"Current status not found"
+            )
+        
+        if old_status==3:
+            raise HTTPException(
+                status_code=301,
+                detail=f"This task is already finished. Please edit the task to change the status in need."
+            )
+        # ---------------------------------
+        # Determine Next Status
+        # ---------------------------------
+        
+        status_flow = {
+
+            1: 2,   # NEW -> IN_PROGRESS
+
+            2: 3    # IN_PROGRESS -> FINISHED
+
+        }
+
+        
+        new_status = status_flow.get(
+            task.task_status_id
+        )
+        
+        if not new_status:
+
+            raise HTTPException(
+
+                status_code=400,
+
+                detail=
+                f"Status change not allowed"
+
+            )
+
+
+
+
+        # ---------------------------------
+        # Update Task
+        # ---------------------------------
+        STATUS_IN_PROGRESS = 2
+        STATUS_FINISHED = 3
+
+        now = datetime.now()
+        
+        task.task_status_id = (
+            new_status
+        )
+        
+        if new_status==STATUS_IN_PROGRESS:
+            task.started_date = (
+               now
+            )
+        
+        if new_status==STATUS_FINISHED:
+            task.completed_date = (
+                now
+            )
+            task.total_minutes = calculate_working_minutes(
+                task.started_date,
+                now
+            )
+            
+        task.updated_by = (
+            current_user.id
+        )
+
+        task.updated_date = (
+            datetime.now()
+        )
+
+        # ---------------------------------
+        # Task History Entry
+        # ---------------------------------
+
+        history = Taskhistory(
+
+            task_id =
+                task.id,
+
+            old_status_id =
+                old_status,
+
+            new_status_id =
+                new_status,
+
+            old_assigned_to =
+                task.assigned_to,
+
+            new_assigned_to =
+                task.assigned_to,
+            
+            comments="Status Changed",
+
+            changed_by =
+                current_user.id,
+
+            changed_at =
+                datetime.now()
+
+        )
+
+
+        db.add(history)
+
+
+
+        db.commit()
+
+
+        db.refresh(task)
+
+
+
+        return {
+            "success":True,
+
+            "message":
+                "Task status updated successfully",
+
+            "task_id":
+                task.id,
+
+            "old_status":
+                old_status,
+
+            "new_status":
+                new_status
+
+        }
+
+
+
+    finally:
+
+        db.close()
+        
+
+    

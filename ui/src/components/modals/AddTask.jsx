@@ -6,15 +6,11 @@ import {
 
 import FormModal from "../common/FormModel";
 
-
 import taskService from "../../api/taskService";
 
 import masterDataService from "../../api/masterdataService";
 
-
 import SnackbarAlert from "../common/SnackbarAlert";
-
-
 
 const AddTaskForm = ({
 
@@ -279,11 +275,10 @@ const AddTaskForm = ({
 
                 }
 
-                resetForm();
-
                 setTimeout(() => {
 
                     onClose();
+                    resetForm();
 
                 }, 800);
 

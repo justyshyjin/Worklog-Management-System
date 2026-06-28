@@ -1,0 +1,247 @@
+/* 
+-------------------------------------------------
+ Common Confirmation Modal Theme
+-------------------------------------------------
+*/
+
+
+.common-confirm-modal
+.MuiPaper-root {
+
+
+    background:
+        linear-gradient(
+            135deg,
+            #081420,
+            #102437
+        ) !important;
+
+
+    color:
+        #d7f7ff !important;
+
+
+    border:
+
+        1px solid
+        rgba(
+            0,
+            255,
+            136,
+            0.25
+        );
+
+
+    border-radius:
+
+        18px !important;
+
+
+    box-shadow:
+
+        0 20px 50px
+        rgba(
+            0,
+            0,
+            0,
+            0.55
+        );
+
+
+    min-width:
+
+        420px;
+
+    text-align: center;
+}
+
+
+
+/*
+-------------------------------------------------
+ Title
+-------------------------------------------------
+*/
+
+
+.confirm-title {
+
+
+    color:
+
+        #00ff88 !important;
+
+
+    font-size:
+
+        22px !important;
+
+
+    font-weight:
+
+        700 !important;
+
+    text-align: center;
+
+}
+
+
+
+/*
+-------------------------------------------------
+ Content
+-------------------------------------------------
+*/
+
+
+.confirm-content {
+
+
+    color:
+
+        #d7f7ff !important;
+
+
+    font-size:
+
+        16px;
+
+
+    line-height:
+
+        1.6;
+
+}
+
+
+
+/*
+-------------------------------------------------
+ Actions
+-------------------------------------------------
+*/
+
+
+.confirm-actions {
+
+
+    padding:
+
+        16px 24px !important;
+
+
+    gap:
+
+        12px;
+    align-self: center;
+
+}
+
+
+
+/*
+-------------------------------------------------
+ Cancel Button
+-------------------------------------------------
+*/
+
+
+.confirm-cancel-btn {
+
+
+    color:
+
+        #d7f7ff !important;
+
+
+    border:
+
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.25
+        ) !important;
+
+
+    border-radius:
+
+        10px !important;
+
+
+}
+
+
+
+.confirm-cancel-btn:hover {
+
+
+    background:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        ) !important;
+
+}
+
+
+
+/*
+-------------------------------------------------
+ Confirm Button
+-------------------------------------------------
+*/
+
+
+.confirm-ok-btn {
+
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #00c853,
+            #00ff88
+        ) !important;
+
+
+    color:
+
+        #001b12 !important;
+
+
+    font-weight:
+
+        700 !important;
+
+
+    border-radius:
+
+        10px !important;
+
+
+    padding:
+
+        8px 25px !important;
+
+}
+
+
+
+.confirm-ok-btn:hover {
+
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #00ff88,
+            #00c853
+        ) !important;
+
+
+}

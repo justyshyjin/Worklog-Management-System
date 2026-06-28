@@ -1,9 +1,9 @@
 import "../../styles/StatCards.css";
 import { useEffect, useState } from "react";
 
-export default function StatCards({
-  stats = []
-}) {
+  export default function StatCards({
+    stats = []
+  }) {
 
   
   return (
