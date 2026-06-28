@@ -21,7 +21,7 @@ import ViewTask from "../modals/ViewTask";
 import "../../styles/TaskGrid.css";
 
 
-const TaskGrid = () => {
+const TaskGrid = ({ setDashboardFilters }) => {
 
   const gridRef = useRef();
 
@@ -33,7 +33,12 @@ const TaskGrid = () => {
 
   const resetFilters = () => {
     setFilters(taskDefaultFilters);
+    setActiveReport(null);
+    if (setDashboardFilters) {
 
+      setDashboardFilters({});
+
+    }
     // reload default platform list
     loadFilterOptions();
   };
@@ -46,7 +51,6 @@ const TaskGrid = () => {
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [alert, setAlert] = useState({
     open: false,
     message: "",
@@ -93,7 +97,6 @@ const TaskGrid = () => {
     async (projectId) => {
 
       try {
-
         const response =
           await taskService.getFilterOptions(
             "tasks",
@@ -101,26 +104,16 @@ const TaskGrid = () => {
               project_id: projectId
             }
           );
-
         setFilterOptions(prev => ({
-
           ...prev,
-
-          platforms:
-            response.data?.platforms || []
-
+          platforms: response.data?.platforms || []
         }));
-
-
       } catch (error) {
-
         console.error(
           "Project platform loading failed",
           error
         );
-
       }
-
     },
     []
   );
@@ -130,28 +123,16 @@ const TaskGrid = () => {
   */
 
   const fetchTasks = useCallback(async (filters = {}) => {
-
     try {
-
       setLoading(true);
-
-
-      const response =
-        await taskService.getTasks(filters);
-
+      const response = await taskService.getTasks(filters);
 
       setTasks(response.data);
 
-
     } catch (error) {
-
       console.error(error);
-
-
     } finally {
-
       setLoading(false);
-
     }
 
   }, []);
@@ -160,9 +141,7 @@ const TaskGrid = () => {
       Initial load
       Filter change reload
   */
-
   useEffect(() => {
-
     fetchTasks(filters);
   }, [filters, fetchTasks]);
 
@@ -177,7 +156,6 @@ const TaskGrid = () => {
       Task created / updated events
   */
   useEffect(() => {
-
     const refreshTasks = () => {
       fetchTasks(filters);
     };
@@ -199,12 +177,8 @@ const TaskGrid = () => {
   */
   const handleStatusChange = async (row) => {
     try {
-
-      const response =
-        await taskService.changeStatus(row.id);
-
+      const response = await taskService.changeStatus(row.id);
       await fetchTasks(filters);
-
       window.dispatchEvent(
         new Event("taskstatus-changed")
       );
@@ -218,19 +192,14 @@ const TaskGrid = () => {
           setAlert(prev => ({ ...prev, open: false }));
         }
       });
-
     } catch (error) {
-
       handleStatusBlocked(error.response?.data?.detail);
-
       console.error("Status change failed", error);
-
     }
 
   };
 
   const handleStatusBlocked = (message) => {
-
     setAlert({
       open: true,
       message,
@@ -247,7 +216,6 @@ const TaskGrid = () => {
       Filter change
   */
   const handleFilterChange = (key, value) => {
-
     setFilters(prev => ({
       ...prev,
       [key]: value
@@ -262,10 +230,8 @@ const TaskGrid = () => {
       View task
   */
   const handleView = (params) => {
-
     setSelectedTask(params.data);
     setViewOpen(true);
-
   };
 
   /*
@@ -279,48 +245,36 @@ const TaskGrid = () => {
       Delete task
   */
   const handleDelete = async (row) => {
-
     try {
-
       await taskService.deleteTask(row.id);
-
       setViewOpen(false);
-
       await fetchTasks(filters);
-
     } catch (error) {
       console.error(error);
     }
   };
 
-
   const columns = [
-
     {
       field: "id",
       headerName: "ID",
       width: 60
     },
-
     {
       field: "task_details",
       headerName: "Task",
       flex: 2
     },
-
     {
       field: "project",
       headerName: "Project",
       width: 150
     },
-
     {
       field: "task_status",
       headerName: "Status",
       width: 140,
-
       cellRenderer: (params) => {
-
         const value =
           params.value || "";
 
@@ -338,28 +292,22 @@ const TaskGrid = () => {
             {value}
           </span>
         );
-
       }
-
     },
-
     {
       field: "task_type",
       headerName: "Type",
       width: 130
     },
-
     {
       field: "task_source",
       headerName: "Task Source",
       width: 130
     },
-
     dateTimeColumn(
       "started_date",
       "Started At"
     ),
-
     dateTimeColumn(
       "completed_date",
       "Completed At"
@@ -368,90 +316,66 @@ const TaskGrid = () => {
       field: "total_minutes",
       headerName: "Hours",
       width: 120,
-
       cellRenderer: (params) => {
-
         return (
           <TaskTimer
-
-            status={
-              params.data.task_status
-            }
-
-            startedDate={
-              params.data.started_date
-            }
-
-            totalMinutes={
-              params.data.total_minutes
-            }
-
+            status={params.data.task_status}
+            startedDate={params.data.started_date}
+            totalMinutes={params.data.total_minutes}
           />
         );
-
       }
-
     },
     {
-
       headerName: "Actions",
-
       width: 160,
-
       cellRenderer: (params) => (
-
         <TaskActions
-
-          row={
-            params.data
-          }
-
-          onStatusChange={
-            handleStatusChange
-          }
-
-          onStatusBlocked={
-            handleStatusBlocked
-          }
-
-          onEdit={
-            handleEdit
-          }
-
-          onDelete={
-            handleDelete
-          }
-
+          row={params.data}
+          onStatusChange={handleStatusChange}
+          onStatusBlocked={handleStatusBlocked}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
-
       )
-
     }
-
   ];
 
   return (
     <div className="task-grid-container">
-
       <div className="task_filters">
+        <div className="quick-filter-section">
+          <QuickReports
+            activeReport={activeReport}
+            setActiveReport={setActiveReport}
+            onSelect={(reportFilters) => {
+              setFilters(prev => {
+                const updated = {
+                  ...prev,
+                  ...reportFilters
+                };
+                if (!reportFilters.range) {
+                  delete updated.range;
+                }
+                // Dashboard gets ONLY dashboard filters
+                setDashboardFilters(
+                  reportFilters.range
+                    ? {
+                      range: reportFilters.range
+                    }
+                    : {}
+                );
 
-        <QuickReports
-          activeReport={activeReport}
-          setActiveReport={setActiveReport}
-          onSelect={(reportFilters) => {
-            setFilters(prev => {
-              const updated = {
-                ...prev,
-                ...reportFilters
-              };
-              if (!reportFilters.range) {
-                delete updated.range;
-              }
-              return updated;
-            });
-          }}
-        />
-
+                return updated;
+              });
+            }}
+          />
+        </div>
+        <div className="export-toolbar">
+          <ExportToolbar rowData={tasks}
+            selectedRows={selectedRows}
+          />
+        </div>
         {/* <SavedFilters
           module="tasks"
           onSelect={(saved) =>
@@ -460,72 +384,34 @@ const TaskGrid = () => {
             )
           }
         /> */}
-        <FilterPanel
-          filters={filters}
-          setFilters={setFilters}
-          fields={taskFilterFields}
-          options={filterOptions}
-          onFilterChange={handleFilterChange}
-          onReset={resetFilters}
-        />
-
+        <div className="filter-panel-section">
+          <FilterPanel
+            filters={filters}
+            setFilters={setFilters}
+            fields={taskFilterFields}
+            options={filterOptions}
+            onFilterChange={handleFilterChange}
+            onReset={resetFilters}
+          />
+        </div>
       </div>
-
-      <div className="export-toolbar">
-
-        <ExportToolbar
-
-          rowData={
-            tasks
-          }
-
-          selectedRows={
-            selectedRows
-          }
-
-        />
-
-      </div>
-
-      <div
-        className="ag-theme-alpine"
+      <div className="ag-theme-alpine"
         style={{
           height: "600px",
           width: "100%"
         }}
       >
-
-        <AgGridReact
-
-          theme="legacy"
-
-          ref={
-            gridRef
-          }
-          rowData={
-            tasks
-          }
-
-          columnDefs={
-            columns
-          }
+        <AgGridReact theme="legacy"
+          ref={gridRef}
+          rowData={tasks}
+          columnDefs={columns}
           pagination={true}
-
           paginationPageSize={20}
           onRowClicked={(params) => {
-
-            if (
-              params.event.target.closest(
-                ".task-actions"
-              )
-            ) {
+            if (params.event.target.closest(".task-actions")) {
               return;
             }
-
-            handleView(
-              params
-            );
-
+            handleView(params);
           }}
           rowSelection={{
             mode: "multiRow",

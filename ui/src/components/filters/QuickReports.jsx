@@ -48,7 +48,7 @@ const handleReportClick = (report) => {
 
   return (
     <div className="quick-reports">
-      <h3>Quick Filters</h3>
+      {/* <h3>Quick Filters</h3> */}
 
       <div className="report-tabs">
         {Array.isArray(reports) &&

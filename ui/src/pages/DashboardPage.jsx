@@ -23,49 +23,22 @@ const DashboardPage = () => {
     user
   } = useAuth();
 
+  // FIX 1: stats should be an array (because you render StatCards)
   const [stats, setStats] = useState([]);
 
-  useEffect(() => {
-    loadStats();
-     const refreshStats = () => {
-            loadStats();
-        };
-
-        const events = [
-            "task-created",
-            "taskstatus-changed"
-        ];
-
-        events.forEach(event => {
-
-            window.addEventListener(
-                event,
-                refreshStats
-            );
-
-        });
-
-        return () => {
-
-            events.forEach(event => {
-
-                window.removeEventListener(
-                    event,
-                    refreshStats
-                );
-
-            });
-
-        };
-  }, []);
+  // Added: shared dashboard filter state
+  const [filters, setFilters] = useState({});
 
   const loadStats =
     async () => {
 
       try {
 
-        const data =
-          await DashboardService.getStats();
+        const res =
+          await DashboardService.getStats(filters);
+
+        // FIX 2: axios response -> res.data
+        const data = res.data;
 
         setStats([
           {
@@ -115,13 +88,48 @@ const DashboardPage = () => {
       }
     };
 
+  useEffect(() => {
+    loadStats();
+    const refreshStats = () => {
+      loadStats();
+    };
+
+    const events = [
+      "task-created",
+      "taskstatus-changed"
+    ];
+
+    events.forEach(event => {
+      window.addEventListener(event, refreshStats);
+    });
+
+    return () => {
+
+      events.forEach(event => {
+        window.removeEventListener(event, refreshStats);
+      });
+
+    };
+
+
+  }, [filters]);
+
+
   return (
     <MainLayout>
       <StatCards stats={stats} />
       <div className="page-header">
         <h2>DashBoard</h2>
       </div>
-      <TaskGrid />
+
+
+      <TaskGrid
+        
+        setDashboardFilters={setFilters}
+
+      />
+
+
     </MainLayout>
   );
 };

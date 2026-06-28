@@ -1,15 +1,17 @@
 import axiosClient from "./axiosClient";
 
-const DashboardService = async () => {
+const DashboardService = {
 
-  const response =
-    await axiosClient.get(
-      "/dashboard/stats"
+  getStats: (params={})=>{
+    return axiosClient.get(
+      "/dashboard/stats",
+      {
+        params
+      }
     );
+  }
 
-  return response.data;
 };
 
-export default {
-    getStats: DashboardService
-};
+export default DashboardService;
+    
