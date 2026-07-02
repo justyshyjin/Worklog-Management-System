@@ -1,10 +1,13 @@
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Slider from "@mui/material/Slider";
+import Typography from "@mui/material/Typography";
 
 
 const FilterField = ({
     field,
+    filters,
     value,
     options,
     onChange
@@ -108,6 +111,171 @@ const FilterField = ({
         );
     }
 
+    // DATE FIELD
+    if (field.type === "date") {
+
+        const today = new Date()
+            .toISOString()
+            .split("T")[0];
+            
+        const minDate = field.dependsOn
+            ? filters?.[field.dependsOn]
+            : undefined;
+
+        return (
+            <TextField
+
+                size="small"
+
+                type="date"
+
+                label={field.label}
+
+                value={value ?? ""}
+
+                inputProps={{
+                    min: minDate,
+                    max: today
+                }}
+
+                InputLabelProps={{
+                    shrink: true
+                }}
+
+                onChange={(e) =>
+                    onChange(
+                        field.key,
+                        e.target.value
+                    )
+                }
+
+            />
+        );
+    }
+
+    // HOURS RANGE FIELD
+    if (field.type === "hours") {
+
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    gap: "8px",
+                    alignItems: "center"
+                }}
+            >
+
+                <TextField
+
+                    size="small"
+
+                    type="number"
+
+                    label="Min Hours"
+
+                    value={
+                        value?.min ?? ""
+                    }
+
+                    onChange={(e) =>
+                        onChange(
+                            field.key,
+                            {
+                                ...value,
+                                min: e.target.value
+                            }
+                        )
+                    }
+
+                />
+
+
+                <TextField
+
+                    size="small"
+
+                    type="number"
+
+                    label="Max Hours"
+
+                    value={
+                        value?.max ?? ""
+                    }
+
+                    onChange={(e) =>
+                        onChange(
+                            field.key,
+                            {
+                                ...value,
+                                max: e.target.value
+                            }
+                        )
+                    }
+
+                />
+
+            </div>
+        );
+    }
+
+
+    // HOURS RANGE SLIDER
+    if (field.type === "range") {
+
+        const rangeValue =
+            Array.isArray(value)
+                ? value
+                : [0, 24];
+
+
+        return (
+
+            <div
+                style={{
+                    width: "250px",
+                    padding: "0 10px"
+                }}
+            >
+
+                <Typography
+                    variant="caption"
+                >
+                    {field.label}:
+                    {" "}
+                    {rangeValue[0]}h
+                    {" - "}
+                    {rangeValue[1]}h
+                </Typography>
+
+
+                <Slider
+
+                    value={rangeValue}
+
+                    min={0}
+
+                    max={24}
+
+                    step={0.1}
+
+                    valueLabelDisplay="auto"
+
+
+                    onChange={
+                        (event, newValue) => {
+                            onChange(
+                                field.key,
+                                newValue
+                            );
+                        }
+                    }
+
+                />
+
+            </div>
+
+        );
+    }
 
     return null;
 

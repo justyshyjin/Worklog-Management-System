@@ -41,6 +41,7 @@ const FilterPanel = ({
                             key={`${field.key}-${index}`}
                             field={field}
                             value={filters?.[field.key] || ""}
+                            filters={filters}
                             options={options}   // 🔥 MUST BE FULL OBJECT
                             onChange={handleChange}
                         />

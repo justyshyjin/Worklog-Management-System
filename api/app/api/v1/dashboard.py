@@ -18,6 +18,54 @@ router = APIRouter()
 def normalize(name: str) -> str:
     return re.sub(r"\s+", "_", name.strip().lower())
 
+def format_minutes(minutes):
+    if not minutes:
+        return "0h 0m"
+
+    hours = minutes // 60
+    mins = minutes % 60
+    return f"{hours}h {mins}m"
+
+def get_today_weekly_monthly_tasks(db: Session, current_user):
+
+    task_query = db.query(Tasks)
+
+    if not is_admin(current_user):
+        task_query = task_query.filter(
+            Tasks.created_by == current_user.id
+        )
+
+    #today task
+    today = date.today()
+    today_tasks = task_query.filter(
+        Tasks.created_date >= datetime.combine(today, datetime.min.time()),
+        Tasks.created_date < datetime.combine(today + timedelta(days=1), datetime.min.time())
+    )   
+
+    #Weekly task
+    today_date = date.today()
+    start_of_week = today_date - timedelta(days=today_date.weekday())
+    end_of_week = start_of_week + timedelta(days=7)
+
+    weekly_tasks = task_query.filter(
+        Tasks.created_date >= datetime.combine(start_of_week, datetime.min.time()),
+        Tasks.created_date < datetime.combine(end_of_week, datetime.min.time())
+    )
+
+    #Monthly task
+    first_day_of_month = date.today().replace(day=1)
+    if date.today().month == 12:
+        first_day_of_next_month = date(date.today().year + 1, 1, 1)
+    else:
+        first_day_of_next_month = date(date.today().year, date.today().month + 1, 1)
+
+        monthly_tasks = task_query.filter(
+        Tasks.created_date >= datetime.combine(first_day_of_month, datetime.min.time()),
+        Tasks.created_date < datetime.combine(first_day_of_next_month, datetime.min.time())
+    )
+
+    return today_tasks, weekly_tasks, monthly_tasks
+
 
 def apply_quick_filter(query, range):
 
@@ -63,15 +111,6 @@ def apply_quick_filter(query, range):
 
     return query
 
-
-def format_minutes(minutes):
-    if not minutes:
-        return "0h 0m"
-
-    hours = minutes // 60
-    mins = minutes % 60
-    return f"{hours}h {mins}m"
-
 # @router.get('/summary')
 # def summary():
 #     return {'total_tasks':0}
@@ -83,7 +122,7 @@ def get_stats(
     # filters: dict = {},   # ✅ ADDED FILTER INPUT
     range: str = None
 ):
-    
+    print(range)
     try:
 
         # Base task query
@@ -96,6 +135,7 @@ def get_stats(
                 Tasks.created_by ==
                 current_user.id
             )
+        today_tasks, weekly_tasks, monthly_tasks = get_today_weekly_monthly_tasks(db, current_user)
 
         # ✅ APPLY QUICK FILTER HERE
         task_query = apply_quick_filter(task_query, range)
@@ -109,6 +149,7 @@ def get_stats(
             .scalar()
             or 0
         )
+        
         
         # 2. Fetch ALL statuses
         status_rows = (
@@ -153,7 +194,6 @@ def get_stats(
             .all()
         )
 
-
         # 5. Fill counts
         for status_id, count in rows:
 
@@ -171,10 +211,13 @@ def get_stats(
         return {
 
             "total": total,
-
+            "today": today_tasks.count(),
+            "weekly": weekly_tasks.count(),
+            "monthly": monthly_tasks.count(),
             **stats
 
         }
 
     finally:
         db.close()
+

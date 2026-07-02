@@ -360,7 +360,9 @@ const AddTaskModal = ({
 
                                 fullWidth
 
-                                multiline
+                                
+                                
+                                
 
                                 rows={3}
 

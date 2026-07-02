@@ -34,9 +34,7 @@ def get_tasks(request: Request,
     platform: List[int] | None =  Query(None),
     created_from: date | None = None,
     created_to: date | None = None,
-    min_hours: int | None = None,
-    max_hours: int | None = None,
-    range: str | None = None,
+    hours: List[float] | None = Query(None),
     db:Session = Depends(get_db),
 
     current_user=Depends(get_current_user)
@@ -120,23 +118,38 @@ def get_tasks(request: Request,
                 Tasks.created_date <= created_to
             )
 
+        
+        #Hours using range filter
+        if hours:
+            min_hours, max_hours = hours
+
+            if min_hours is not None:
+                query = query.filter(
+                    Tasks.total_minutes >= (min_hours * 60)
+                )
+
+            if max_hours is not None:
+                query = query.filter(
+                    Tasks.total_minutes <= (max_hours * 60)
+                )
+
         # ----------------------------------
         # Hours filter
         # ----------------------------------
 
-        if min_hours is not None:
+        # if min_hours is not None:
 
-            query = query.filter(
-                Tasks.total_minutes >=
-                (min_hours * 60)
-            )
+        #     query = query.filter(
+        #         Tasks.total_minutes >=
+        #         (min_hours * 60)
+        #     )
 
-        if max_hours is not None:
+        # if max_hours is not None:
 
-            query = query.filter(
-                Tasks.total_minutes <=
-                (max_hours * 60)
-            )
+        #     query = query.filter(
+        #         Tasks.total_minutes <=
+        #         (max_hours * 60)
+        #     )
         # ----------------------------------
         # Quick Report
         # ----------------------------------
@@ -185,7 +198,11 @@ def get_tasks(request: Request,
                     Tasks.task_status_id == 2,
                     0
                 ),
-                else_=1
+                (
+                    Tasks.task_status_id == 1,
+                    1
+                ),
+                else_=2
             ),
 
             Tasks.id.asc()

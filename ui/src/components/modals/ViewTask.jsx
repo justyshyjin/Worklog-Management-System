@@ -69,7 +69,7 @@ const ViewTask = ({
         },
 
         {
-            label: "Total Minutes",
+            label: "Time",
             key: "total_minutes"
         },
 

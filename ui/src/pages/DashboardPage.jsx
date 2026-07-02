@@ -75,6 +75,21 @@ const DashboardPage = () => {
             title: "DROPPED",
             value: data.dropped,
             color: "#FF5252"
+          },
+          {
+            title: "Todays Tasks",
+            value: data.today,
+            color: "#5289ffa9"
+          },
+          {
+            title: "Week Tasks",
+            value: data.weekly,
+            color: "#ffd752a9"
+          },
+          {
+            title: "Month Tasks",
+            value: data.monthly,
+            color: "#ba52ffa9"
           }
         ]);
 
@@ -124,7 +139,7 @@ const DashboardPage = () => {
 
 
       <TaskGrid
-        
+
         setDashboardFilters={setFilters}
 
       />

@@ -314,7 +314,7 @@ const TaskGrid = ({ setDashboardFilters }) => {
     ),
     {
       field: "total_minutes",
-      headerName: "Hours",
+      headerName: "Time",
       width: 120,
       cellRenderer: (params) => {
         return (
@@ -343,6 +343,7 @@ const TaskGrid = ({ setDashboardFilters }) => {
 
   return (
     <div className="task-grid-container">
+      <h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filters</h3>
       <div className="task_filters">
         <div className="quick-filter-section">
           <QuickReports
@@ -370,20 +371,8 @@ const TaskGrid = ({ setDashboardFilters }) => {
               });
             }}
           />
+          
         </div>
-        <div className="export-toolbar">
-          <ExportToolbar rowData={tasks}
-            selectedRows={selectedRows}
-          />
-        </div>
-        {/* <SavedFilters
-          module="tasks"
-          onSelect={(saved) =>
-            setFilters(
-              saved.filter_json
-            )
-          }
-        /> */}
         <div className="filter-panel-section">
           <FilterPanel
             filters={filters}
@@ -394,7 +383,22 @@ const TaskGrid = ({ setDashboardFilters }) => {
             onReset={resetFilters}
           />
         </div>
+        
+        {/* <SavedFilters
+          module="tasks"
+          onSelect={(saved) =>
+            setFilters(
+              saved.filter_json
+            )
+          }
+        /> */}
+        
       </div>
+      <div className="export-toolbar">
+          <ExportToolbar rowData={tasks}
+            selectedRows={selectedRows}
+          />
+        </div>
       <div className="ag-theme-alpine"
         style={{
           height: "600px",

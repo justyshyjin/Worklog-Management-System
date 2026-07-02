@@ -34,7 +34,7 @@ export const taskFilterFields = [
 
     dateToFilter,
 
-    ...hoursRangeFilters
+    hoursRangeFilters
 ];
 
 
@@ -46,7 +46,6 @@ export const taskDefaultFilters = {
     platform: [],
     created_from: null,
     created_to: null,
-    min_hours: null,
-    max_hours: null
+    hours: null
 
 };

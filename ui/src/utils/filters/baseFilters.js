@@ -1,5 +1,6 @@
 // src/utils/filters/baseFilters.js
 
+
 export const textSearchFilter = {
     key: "search",
     label: "Search",
@@ -39,18 +40,18 @@ export const dateFromFilter = {
 export const dateToFilter = {
     key: "created_to",
     label: "To Date",
-    type: "date"
+    type: "date",
+    dependsOn:"created_from"
 };
 
-export const hoursRangeFilters = [
-    {
-        key: "min_hours",
+export const hoursRangeFilters = {
+        key: "hours",
         label: "Min Hours",
-        type: "number"
-    },
-    {
-        key: "max_hours",
-        label: "Max Hours",
-        type: "number"
-    }
-];
+        type: "range"
+};
+// export const hoursRangeFilters = {
+//         key: "hours",
+//         label: "Min Hours",
+//         type: "range"
+// };
+
