@@ -1,39 +1,78 @@
+import { useState } from "react";
+
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+// import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ConfirmModel from "../common/ConfirmModel";
 
-import { nextStatus,canMoveNext } from "../../utils/statusflow";
 
 const TaskActions = ({
   row,
   onStatusChange,
-  onView,
+  onStatusBlocked,
   onEdit,
   onDelete
 }) => {
 
-  const handleStatusChange = () => {
 
-    const newStatus =
-        nextStatus(
-            row.task_status
-        );
-
-
-    if(!newStatus)
-        return;
+    const [
+        confirmOpen,
+        setConfirmOpen
+    ] = useState(false);
 
 
-    onStatusChange(
-        row,
-        newStatus
-    );
+    const [
+        nextStatusValue,
+        setNextStatusValue
+    ] = useState("");
 
-};
+
+
+    const handleStatusChange = (event)=>{
+
+        event.stopPropagation();
+        setConfirmOpen(true);
+
+    };
+
+
+
+    const confirmStatusChange = ()=>{
+
+        onStatusChange(row);
+
+        setConfirmOpen(false);
+
+    };
+
+  const handleEdit = (event) => {
+
+    event.stopPropagation();
+
+    onEdit(row);
+
+  };
+
+  const handleDelete = (event) => {
+
+    event.stopPropagation();
+
+    onDelete(row);
+
+  };
 
   return (
-    <div className="task-actions">
+
+        <>
+
+
+    <div
+      className="task-actions"
+      onClick={(e)=>
+                e.stopPropagation()
+            }
+    >
 
       {/* <button
         className="action-btn view"
@@ -44,26 +83,82 @@ const TaskActions = ({
       <button
         className="action-btn run"
         alt="Change Status"
-        onClick={handleStatusChange}
+        onClick={
+                    handleStatusChange
+                }
       >
         <PlayArrowIcon fontSize="small" />
       </button>
+
+
+
       <button
+
         className="action-btn edit"
-        onClick={() => onEdit(row)}
-      >
-        <EditIcon fontSize="small" />
+
+                onClick={(e)=>{
+
+                    e.stopPropagation();
+
+                    onEdit(row);
+
+                }}
+
+            >
+
+                <EditIcon
+                    fontSize="small"
+                />
+
       </button>
 
 
       <button
         className="action-btn delete"
-        onClick={() => onDelete(row)}
-      >
-        <DeleteIcon fontSize="small" />
+
+                onClick={(e)=>{
+
+                    e.stopPropagation();
+
+                    onDelete(row);
+
+                }}
+
+            >
+
+                <DeleteIcon
+                    fontSize="small"
+                />
+
       </button>
 
     </div>
+
+
+
+        <ConfirmModel
+
+            open={confirmOpen}
+
+            title="Change Task Status"
+
+            message={
+                `Move task status to Next Status`
+            }
+
+            onConfirm={
+                confirmStatusChange
+            }
+
+            onCancel={()=>
+                setConfirmOpen(false)
+            }
+
+        />
+
+
+        </>
+
   );
 };
 

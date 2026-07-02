@@ -7,8 +7,6 @@ import {AuthProvider} from "./context/AuthContext";
 
 import "./styles/theme.css";
 
-import {TaskProvider} from "./context/TaskContext";
-
 import {
   ModuleRegistry,
   ClientSideRowModelModule,
@@ -28,11 +26,7 @@ ReactDOM.createRoot(
 
         <AuthProvider>
 
-            <TaskProvider>
-
                 <App />
-
-            </TaskProvider>
 
         </AuthProvider>
 

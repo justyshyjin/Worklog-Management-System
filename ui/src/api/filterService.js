@@ -1,38 +1,52 @@
 import axiosClient from "./axiosClient";
 
+
 const filterService = {
 
-  getSavedFilters() {
-    return axiosClient.get(
-      "/saved-filters"
-    );
-  },
 
-  getSavedFilter(id) {
-    return axiosClient.get(
-      `/saved-filters/${id}`
-    );
-  },
+  getSavedFilters: (module) =>
+    axiosClient.get(
+      "/savedfilters",
+      {
+        params: {
+          module
+        }
+      }
+    ),
 
-  createSavedFilter(data) {
-    return axiosClient.post(
-      "/saved-filters",
+  getSavedFilter: (id) =>
+    axiosClient.get(
+      `/savedfilters/${id}`
+    ),
+
+
+
+  createSavedFilter: (data) =>
+    axiosClient.post(
+      "/savedfilters",
       data
-    );
-  },
+    ),
 
-  updateSavedFilter(id,data) {
-    return axiosClient.put(
-      `/saved-filters/${id}`,
+
+
+  updateSavedFilter: (
+    id,
+    data
+  ) =>
+    axiosClient.put(
+      `/savedfilters/${id}`,
       data
-    );
-  },
+    ),
 
-  deleteSavedFilter(id) {
-    return axiosClient.delete(
-      `/saved-filters/${id}`
-    );
-  }
+
+
+  deleteSavedFilter: (id) =>
+    axiosClient.delete(
+      `/savedfilters/${id}`
+    )
+
+
 };
+
 
 export default filterService;

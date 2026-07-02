@@ -14,18 +14,19 @@ def get_tasktype(
 ):
     
     try:
-        tasktype = (
-            db.query(Tasktype)
-            .all()
-        )
+        print("task Status")
+    #     tasktype = (
+    #         db.query(Tasktype)
+    #         .all()
+    #     )
 
-        return [
-            {
-                "id": tt.id,
-                "tasktype_name": tt.task_type_name
-            }
-            for tt in tasktype
-        ]
+    #     return [
+    #         {
+    #             "id": tt.id,
+    #             "tasktype_name": tt.task_type_name
+    #         }
+    #         for tt in tasktype
+    #     ]
 
     finally:
 

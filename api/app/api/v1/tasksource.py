@@ -1,13 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from sqlalchemy import func
 from app.models.tasksource import Tasksource
-from app.database import SessionLocal
+from app.db.session import get_db
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
 @router.get("")
-def get_tasksource():
-    db= SessionLocal()
+def get_tasksource(
+    db:Session=Depends(get_db)
+):
+    
     try:
 
         tasksource = (
