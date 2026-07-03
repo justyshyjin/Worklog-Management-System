@@ -39,3 +39,6 @@ ON user_login_history(user_id);
 
 CREATE INDEX idx_task_history_task_id
 ON task_history(task_id);
+
+CREATE INDEX idx_task_comments_task_created
+ON task_comments(task_id, created_at);

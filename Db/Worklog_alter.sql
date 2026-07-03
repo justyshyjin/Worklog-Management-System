@@ -20,3 +20,4 @@ ADD COLUMN is_active TINYINT(1) DEFAULT 1;
 
 ALTER TABLE task_types
 ADD COLUMN is_active TINYINT(1) DEFAULT 1;
+

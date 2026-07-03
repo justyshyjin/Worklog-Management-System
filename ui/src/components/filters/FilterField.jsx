@@ -117,7 +117,7 @@ const FilterField = ({
         const today = new Date()
             .toISOString()
             .split("T")[0];
-            
+
         const minDate = field.dependsOn
             ? filters?.[field.dependsOn]
             : undefined;
@@ -225,7 +225,7 @@ const FilterField = ({
         const rangeValue =
             Array.isArray(value)
                 ? value
-                : [0, 24];
+                : [0, 100];
 
 
         return (
@@ -239,28 +239,22 @@ const FilterField = ({
 
                 <Typography
                     variant="caption"
+                    color={field.disabled ? "#bdbdbd73" : "#dee7da"}
                 >
-                    {field.label}:
-                    {" "}
-                    {rangeValue[0]}h
-                    {" - "}
-                    {rangeValue[1]}h
+                    {field.label}: {" "}
+                    {rangeValue[0]}h{" - "}{rangeValue[1]}h
+                    {field.disabled && (
+                        <> (Available only when all displayed tasks are finished)</>
+                    )}
                 </Typography>
 
-
                 <Slider
-
                     value={rangeValue}
-
                     min={0}
-
-                    max={24}
-
+                    max={100}
                     step={0.1}
-
                     valueLabelDisplay="auto"
-
-
+                    disabled={field.disabled ?? false}
                     onChange={
                         (event, newValue) => {
                             onChange(

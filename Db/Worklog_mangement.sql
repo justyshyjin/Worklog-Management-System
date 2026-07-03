@@ -253,20 +253,20 @@ CREATE TABLE task_history (
 
     task_id BIGINT NOT NULL,
 
-    old_status_id INT NULL,
+    from_status_id INT NULL,
 
-    new_status_id INT NULL,
+    to_status_id INT NULL,
 
     old_assigned_to INT NULL,
 
     new_assigned_to INT NULL,
 
-    comments TEXT,
+    action VARCHAR(50) NOT NULL,
 
     changed_by INT NOT NULL,
 
-    changed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+     
     FOREIGN KEY(task_id)
         REFERENCES tasks(id),
 
@@ -441,5 +441,33 @@ CREATE TABLE saved_filters (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP
 
+);
+
+-- Table to store comments for each task
+CREATE TABLE task_comments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    task_id BIGINT NOT NULL,
+
+    comment TEXT NOT NULL,
+
+    comment_type VARCHAR(50) NOT NULL DEFAULT 'NOTE',
+
+    created_by INT NOT NULL,
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME NULL,
+
+    is_edited BOOLEAN NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_task_comments_task
+        FOREIGN KEY (task_id)
+        REFERENCES tasks(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_task_comments_user
+        FOREIGN KEY (created_by)
+        REFERENCES users(id)
 );
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect,useMemo, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -15,6 +15,7 @@ import { dateTimeColumn } from "../../utils/formatter";
 import ExportToolbar from "../export/ExportToolbar";
 
 import taskService from "../../api/taskService";
+import DashboardService from "../../api/dashboardService";
 
 import TaskTimer from "../common/TaskTimer";
 import ViewTask from "../modals/ViewTask";
@@ -118,6 +119,7 @@ const TaskGrid = ({ setDashboardFilters }) => {
     []
   );
 
+  const [hoursFilterEnabled, setHoursFilterEnabled] = useState(false);
   /*
       Fetch tasks using filters
   */
@@ -129,6 +131,11 @@ const TaskGrid = ({ setDashboardFilters }) => {
 
       setTasks(response.data);
 
+      // console.log(response.data.map(task => task.task_status));
+      setHoursFilterEnabled(
+        response.data.length > 0 &&
+        response.data.every(task => task.task_status === "FINISHED")
+      );
     } catch (error) {
       console.error(error);
     } finally {
@@ -136,6 +143,19 @@ const TaskGrid = ({ setDashboardFilters }) => {
     }
 
   }, []);
+
+  const filterFields = useMemo(() => {
+    return taskFilterFields.map(filter => {
+        if (filter.key === "hours") {
+            return {
+                ...filter,
+                disabled: !hoursFilterEnabled
+            };
+        }
+
+        return filter;
+    });
+}, [hoursFilterEnabled]);
 
   /*
       Initial load
@@ -172,6 +192,17 @@ const TaskGrid = ({ setDashboardFilters }) => {
 
   }, [fetchTasks, filters]);
 
+
+  useEffect(() => {
+    if (!hoursFilterEnabled && filters.hours) {
+      setFilters(prev => ({
+        ...prev,
+        hours: null
+      }));
+    }
+  }, [hoursFilterEnabled]);
+
+  
   /*
       Status change
   */
@@ -371,19 +402,19 @@ const TaskGrid = ({ setDashboardFilters }) => {
               });
             }}
           />
-          
+
         </div>
         <div className="filter-panel-section">
           <FilterPanel
             filters={filters}
             setFilters={setFilters}
-            fields={taskFilterFields}
+            fields={filterFields}
             options={filterOptions}
             onFilterChange={handleFilterChange}
             onReset={resetFilters}
           />
         </div>
-        
+
         {/* <SavedFilters
           module="tasks"
           onSelect={(saved) =>
@@ -392,13 +423,13 @@ const TaskGrid = ({ setDashboardFilters }) => {
             )
           }
         /> */}
-        
+
       </div>
       <div className="export-toolbar">
-          <ExportToolbar rowData={tasks}
-            selectedRows={selectedRows}
-          />
-        </div>
+        <ExportToolbar rowData={tasks}
+          selectedRows={selectedRows}
+        />
+      </div>
       <div className="ag-theme-alpine"
         style={{
           height: "600px",

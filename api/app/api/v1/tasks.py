@@ -36,7 +36,7 @@ def get_tasks(request: Request,
     created_to: date | None = None,
     hours: List[float] | None = Query(None),
     db:Session = Depends(get_db),
-
+    range: str | None = None,
     current_user=Depends(get_current_user)
 
 ):
@@ -118,10 +118,14 @@ def get_tasks(request: Request,
                 Tasks.created_date <= created_to
             )
 
-        
         #Hours using range filter
         if hours:
             min_hours, max_hours = hours
+
+            # Only finished tasks should be considered for hour filtering
+            query = query.filter(
+                Tasks.task_status_id == 3   # 3 is the id of the finished status
+            )
 
             if min_hours is not None:
                 query = query.filter(
@@ -186,6 +190,8 @@ def get_tasks(request: Request,
                 Tasks.created_date >= datetime.combine(start_of_month, datetime.min.time()),
                 Tasks.created_date < datetime.combine(next_month, datetime.min.time())
             )
+
+        
         # ----------------------------------
         # IN_PROGRESS first
         # then ID order
@@ -385,23 +391,22 @@ async def createtask(
                 new_task.id,
 
 
-            old_status_id=
-                None,
-
-
-            new_status_id=
+            from_status_id=
                 1,
 
 
+            to_status_id=
+                1,
+
             old_assigned_to=
-                None,
+                current_user.id,
 
 
             new_assigned_to=
                 current_user.id,
 
 
-            comments=
+            action=
                 "Task Created",
 
 
@@ -409,7 +414,7 @@ async def createtask(
                 current_user.id,
 
 
-            changed_at=
+            created_at=
                 datetime.now()
         )
 
@@ -472,16 +477,16 @@ def change_task_status(
         # Current Status
         # ---------------------------------
         
-        old_status = task.task_status_id
+        from_status = task.task_status_id
             
-        if not old_status:
+        if not from_status:
 
             raise HTTPException(
                 status_code=400,
                 detail=f"Current status not found"
             )
         
-        if old_status==3:
+        if from_status==3:
             raise HTTPException(
                 status_code=301,
                 detail=f"This task is already finished. Please edit the task to change the status in need."
@@ -499,11 +504,11 @@ def change_task_status(
         }
 
         
-        new_status = status_flow.get(
+        to_status = status_flow.get(
             task.task_status_id
         )
         
-        if not new_status:
+        if not to_status:
 
             raise HTTPException(
 
@@ -526,15 +531,15 @@ def change_task_status(
         now = datetime.now()
         
         task.task_status_id = (
-            new_status
+            to_status
         )
         
-        if new_status==STATUS_IN_PROGRESS:
+        if to_status==STATUS_IN_PROGRESS:
             task.started_date = (
                now
             )
         
-        if new_status==STATUS_FINISHED:
+        if to_status==STATUS_FINISHED:
             task.completed_date = (
                 now
             )
@@ -560,11 +565,11 @@ def change_task_status(
             task_id =
                 task.id,
 
-            old_status_id =
-                old_status,
+            from_status_id =
+                from_status,
 
-            new_status_id =
-                new_status,
+            to_status_id =
+                to_status,
 
             old_assigned_to =
                 task.assigned_to,
@@ -572,27 +577,25 @@ def change_task_status(
             new_assigned_to =
                 task.assigned_to,
             
-            comments="Status Changed",
+            action="Status Changed",
 
             changed_by =
-                current_user.id,
-
-            changed_at =
-                datetime.now()
+                current_user.id                                                                                                                                                                                                           
 
         )
 
 
         db.add(history)
 
-
-
-        db.commit()
-
-
-        db.refresh(task)
-
-
+        try:
+            db.commit()
+            db.refresh(task)
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=str(e)
+            )   
 
         return {
             "success":True,
@@ -603,11 +606,11 @@ def change_task_status(
             "task_id":
                 task.id,
 
-            "old_status":
-                old_status,
+            "from_status":
+                from_status,
 
-            "new_status":
-                new_status
+            "to_status":
+                to_status
 
         }
 

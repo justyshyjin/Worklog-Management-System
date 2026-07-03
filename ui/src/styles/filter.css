@@ -283,3 +283,8 @@
         0 5px 15px rgba(0,102,255,0.35);
 
 }
+
+/* range filter disabled */
+.Mui-disabled{
+    color: #bdbdbd4f!important;
+}

@@ -120,15 +120,18 @@ def get_stats(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
     # filters: dict = {},   # ✅ ADDED FILTER INPUT
-    range: str = None
+    range: str = None,
+    created_from: str = None,
+    created_to: str = None ,
+    hours: float = None
 ):
-    print(range)
+    
     try:
 
         # Base task query
         task_query = db.query(Tasks)
 
-        # Normal user can see only own tasks
+        # 🔐 USER SCOPE FILTER (IMPORTANT) 
         if not is_admin(current_user):
 
             task_query = task_query.filter(
@@ -136,6 +139,30 @@ def get_stats(
                 current_user.id
             )
         today_tasks, weekly_tasks, monthly_tasks = get_today_weekly_monthly_tasks(db, current_user)
+
+        # 📅 DATE FILTERS
+        if created_from:
+            created_from_date = datetime.strptime(created_from, "%Y-%m-%d")
+            task_query = task_query.filter(
+                Tasks.created_date >= created_from_date
+            )
+
+        if created_to:
+            created_to_date = datetime.strptime(created_to, "%Y-%m-%d")
+            # include full day (recommended fix)
+            created_to_date = created_to_date.replace(
+                hour=23, minute=59, second=59, microsecond=999999
+            )
+            task_query = task_query.filter(
+                Tasks.created_date <= created_to_date
+            )
+
+        # ⏱ HOURS FILTER
+        if hours is not None:
+            task_query = task_query.filter(
+                Tasks.hours >= hours
+            )
+
 
         # ✅ APPLY QUICK FILTER HERE
         task_query = apply_quick_filter(task_query, range)

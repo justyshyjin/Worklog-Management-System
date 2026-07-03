@@ -38,7 +38,7 @@ class Taskhistory(Base):
     )
 
 
-    old_status_id: Mapped[int | None] = mapped_column(
+    from_status_id: Mapped[int | None] = mapped_column(
         Integer,
         ForeignKey(
             "task_status.id"
@@ -47,7 +47,7 @@ class Taskhistory(Base):
     )
 
 
-    new_status_id: Mapped[int | None] = mapped_column(
+    to_status_id: Mapped[int | None] = mapped_column(
         Integer,
         ForeignKey(
             "task_status.id"
@@ -74,7 +74,7 @@ class Taskhistory(Base):
     )
 
 
-    comments: Mapped[str | None] = mapped_column(
+    action: Mapped[str | None] = mapped_column(
         Text,
         nullable=True
     )
@@ -89,7 +89,7 @@ class Taskhistory(Base):
     )
 
 
-    changed_at: Mapped[datetime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.now
     )
@@ -106,15 +106,15 @@ class Taskhistory(Base):
     )
 
 
-    old_status = relationship(
+    from_status = relationship(
         "Taskstatus",
-        foreign_keys=[old_status_id]
+        foreign_keys=[from_status_id]
     )
 
 
-    new_status = relationship(
+    to_status = relationship(
         "Taskstatus",
-        foreign_keys=[new_status_id]
+        foreign_keys=[to_status_id]
     )
 
 

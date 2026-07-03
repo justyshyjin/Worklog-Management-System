@@ -129,6 +129,7 @@ const DashboardPage = () => {
 
   }, [filters]);
 
+  // DashboardService.getStats()
 
   return (
     <MainLayout>
