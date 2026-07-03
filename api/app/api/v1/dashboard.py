@@ -7,9 +7,9 @@ from app.db.session import get_db
 from sqlalchemy.orm import Session
 from app.core.permission import is_admin
 from datetime import datetime, timedelta,date
-from zoneinfo import ZoneInfo
 
 from app.auth.dependencies import get_current_user
+from app.util.formatters import (to_utc)
 
 import re
 
@@ -75,9 +75,9 @@ def apply_quick_filter(query, range):
 
     if range_filter == "today":
 
-        start = datetime.combine(now, datetime.min.time()),
+        start = datetime.combine(now, datetime.min.time())
         end = datetime.combine(now + timedelta(days=1), datetime.min.time())
-
+        
         return query.filter(
             Tasks.created_date >= start,
             Tasks.created_date < end
@@ -138,24 +138,44 @@ def get_stats(
                 Tasks.created_by ==
                 current_user.id
             )
+            
         today_tasks, weekly_tasks, monthly_tasks = get_today_weekly_monthly_tasks(db, current_user)
 
         # 📅 DATE FILTERS
+
+        created_from_date = None
+        created_to_date = None
+        
         if created_from:
             created_from_date = datetime.strptime(created_from, "%Y-%m-%d")
-            task_query = task_query.filter(
-                Tasks.created_date >= created_from_date
-            )
 
         if created_to:
             created_to_date = datetime.strptime(created_to, "%Y-%m-%d")
-            # include full day (recommended fix)
-            created_to_date = created_to_date.replace(
-                hour=23, minute=59, second=59, microsecond=999999
-            )
+        
+        # CASE 1: only created_from → from date to now
+        if created_from_date and not created_to_date:
             task_query = task_query.filter(
-                Tasks.created_date <= created_to_date
+                Tasks.created_date >= created_from_date
             )
+        # CASE 2: only created_to → from earliest to created_to
+        elif created_to_date and not created_from_date:
+            task_query = task_query.filter(
+                Tasks.created_date <= created_to_date.replace(
+                    hour=23, minute=59, second=59, microsecond=999999
+                )
+            )
+        # CASE 3: both exist → range filter
+        elif created_from_date and created_to_date:
+            start = datetime.combine(created_from_date.date(), datetime.min.time())
+            end = datetime.combine(created_to_date.date() + timedelta(days=1), datetime.min.time())
+
+            # start = to_utc(start)
+            # end = to_utc(end)
+            task_query = task_query.filter(
+                Tasks.created_date >= start,
+                Tasks.created_date <= end
+            )
+            
 
         # ⏱ HOURS FILTER
         if hours is not None:
@@ -238,9 +258,9 @@ def get_stats(
         return {
 
             "total": total,
-            "today": today_tasks.count(),
-            "weekly": weekly_tasks.count(),
-            "monthly": monthly_tasks.count(),
+            "global_today": today_tasks.count(),
+            "global_weekly": weekly_tasks.count(),
+            "global_monthly": monthly_tasks.count(),
             **stats
 
         }

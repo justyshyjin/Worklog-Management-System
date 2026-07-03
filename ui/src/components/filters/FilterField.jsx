@@ -114,9 +114,11 @@ const FilterField = ({
     // DATE FIELD
     if (field.type === "date") {
 
-        const today = new Date()
-            .toISOString()
-            .split("T")[0];
+        // const today = new Date()
+        //     .toISOString()
+        //     .split("T")[0];
+
+        const today = new Date().toLocaleDateString("en-CA");
 
         const minDate = field.dependsOn
             ? filters?.[field.dependsOn]

@@ -21,28 +21,26 @@ const QuickReports = ({
   reports = defaultReports,
   activeReport,
   setActiveReport,
-  onSelect = () => {}
+  onSelect = () => { }
 }) => {
-const handleReportClick = (report) => {
+  const handleReportClick = (report) => {
 
+    const reportKey = report.filters.range;
 
-    // If same button clicked again
-    // remove quick report filter
-    if (activeReport === report.name) {
+    // Same button clicked again
+    if (activeReport === reportKey) {
 
       setActiveReport(null);
 
-      onSelect({});   // clear range from parent
+      onSelect({});
 
       return;
     }
 
-
     // New quick report selected
-    setActiveReport(report.name);
+    setActiveReport(reportKey);
 
     onSelect(report.filters);
-
   };
 
 
@@ -55,9 +53,9 @@ const handleReportClick = (report) => {
           reports.map((report) => (
             <button
               key={report.name}
-              className={`report-tab ${activeReport === report.name ? "active" : ""
+              className={`report-tab ${activeReport === report.filters.range  ? "active" : ""
                 }`}
-              onClick={() => 
+              onClick={() =>
                 handleReportClick(report)
               }
             >

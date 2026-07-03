@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect,useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -134,7 +134,8 @@ const TaskGrid = ({ setDashboardFilters }) => {
       // console.log(response.data.map(task => task.task_status));
       setHoursFilterEnabled(
         response.data.length > 0 &&
-        response.data.every(task => task.task_status === "FINISHED")
+        response.data.every(task =>
+          (task.task_status || "").trim().toUpperCase() === "FINISHED")
       );
     } catch (error) {
       console.error(error);
@@ -146,17 +147,25 @@ const TaskGrid = ({ setDashboardFilters }) => {
 
   const filterFields = useMemo(() => {
     return taskFilterFields.map(filter => {
-        if (filter.key === "hours") {
-            return {
-                ...filter,
-                disabled: !hoursFilterEnabled
-            };
-        }
+      if (filter.key === "hours") {
+        return {
+          ...filter,
+          disabled: !hoursFilterEnabled
+        };
+      }
 
-        return filter;
+      return filter;
     });
-}, [hoursFilterEnabled]);
+  }, [hoursFilterEnabled]);
 
+  useEffect(() => {
+    if (!hoursFilterEnabled && filters.hours) {
+      setFilters(prev => ({
+        ...prev,
+        hours: null
+      }));
+    }
+  }, [hoursFilterEnabled, filters.hours]);
   /*
       Initial load
       Filter change reload
@@ -190,7 +199,7 @@ const TaskGrid = ({ setDashboardFilters }) => {
       window.removeEventListener("taskstatus-changed", refreshTasks);
     };
 
-  }, [fetchTasks, filters]);
+  }, [fetchTasks]);
 
 
   useEffect(() => {
@@ -202,7 +211,7 @@ const TaskGrid = ({ setDashboardFilters }) => {
     }
   }, [hoursFilterEnabled]);
 
-  
+
   /*
       Status change
   */
@@ -246,16 +255,45 @@ const TaskGrid = ({ setDashboardFilters }) => {
   /*
       Filter change
   */
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  const handleFilterChange = (name, value) => {
+    setFilters((prev) => {
+      const updated = {
+        ...prev,
+        [name]: value,
+      };
 
-    if (key === "project") {
-      loadProjectPlatforms(value); // optional reload
-    }
+      // Custom date selected -> clear quick report
+      if ((name === "created_from" || name === "created_to") && value) {
+        updated.range = null;
+
+        setActiveReport(null);
+
+        setDashboardFilters?.({
+          created_from: updated.created_from,
+          created_to: updated.created_to,
+        });
+      }
+
+      // Quick report selected -> clear custom dates
+      if (name === "range") {
+        updated.created_from = null;
+        updated.created_to = null;
+
+        setActiveReport(value || null);
+
+        setDashboardFilters?.(
+          value
+            ? {
+              range: value,
+            }
+            : {}
+        );
+      }
+
+      return updated;
+    });
   };
+
 
   /*
       View task
@@ -381,25 +419,7 @@ const TaskGrid = ({ setDashboardFilters }) => {
             activeReport={activeReport}
             setActiveReport={setActiveReport}
             onSelect={(reportFilters) => {
-              setFilters(prev => {
-                const updated = {
-                  ...prev,
-                  ...reportFilters
-                };
-                if (!reportFilters.range) {
-                  delete updated.range;
-                }
-                // Dashboard gets ONLY dashboard filters
-                setDashboardFilters(
-                  reportFilters.range
-                    ? {
-                      range: reportFilters.range
-                    }
-                    : {}
-                );
-
-                return updated;
-              });
+              handleFilterChange("range", reportFilters.range);
             }}
           />
 

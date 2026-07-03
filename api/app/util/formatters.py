@@ -1,4 +1,5 @@
 from datetime import datetime, time, timedelta
+from zoneinfo import ZoneInfo
 
 
 WORK_START = time(10, 00)
@@ -68,3 +69,10 @@ def calculate_working_minutes(
 
 
     return total_minutes
+
+# Time formatter for IST and UTC 
+def to_utc(dt):
+    IST = ZoneInfo("Asia/Kolkata")
+    UTC = ZoneInfo("UTC")
+    
+    return dt.replace(tzinfo=IST).astimezone(UTC)

@@ -78,17 +78,17 @@ const DashboardPage = () => {
           },
           {
             title: "Todays Tasks",
-            value: data.today,
+            value: data.global_today,
             color: "#5289ffa9"
           },
           {
             title: "Week Tasks",
-            value: data.weekly,
+            value: data.global_weekly,
             color: "#ffd752a9"
           },
           {
             title: "Month Tasks",
-            value: data.monthly,
+            value: data.global_monthly,
             color: "#ba52ffa9"
           }
         ]);
@@ -129,7 +129,7 @@ const DashboardPage = () => {
 
   }, [filters]);
 
-  // DashboardService.getStats()
+
 
   return (
     <MainLayout>
