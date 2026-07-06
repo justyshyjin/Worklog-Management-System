@@ -262,6 +262,10 @@ const TaskGrid = ({ setDashboardFilters }) => {
         [name]: value,
       };
 
+      if (name === "project") {
+        loadProjectPlatforms(value); // optional reload
+      }
+
       // Custom date selected -> clear quick report
       if ((name === "created_from" || name === "created_to") && value) {
         updated.range = null;
